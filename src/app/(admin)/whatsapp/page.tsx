@@ -50,7 +50,7 @@ export default function WhatsAppPage() {
     if (!EVOLUTION_URL) return;
     try {
       const data = await apiCall(`/instance/connectionState/${instanceName}`);
-      const state = data?.instance?.state ?? data?.state;
+      const state = data?.instance?.state ?? data?.state ?? data?.connectionStatus;
       if (state === "open") {
         setStatus("connected");
         setQrCode(null);
@@ -84,14 +84,25 @@ export default function WhatsAppPage() {
           instanceName,
           qrcode: true,
           integration: "WHATSAPP-BAILEYS",
+          token: instanceName,
         });
       } catch {
         // instance may already exist — ignore
       }
 
       // fetch qr
-      const qrData = await apiCall(`/instance/connect/${instanceName}`);
-      const base64 = qrData?.base64 ?? qrData?.qrcode?.base64;
+      let qrData: any = null;
+      try {
+        qrData = await apiCall(`/instance/connect/${instanceName}`);
+      } catch {
+        // try fetching qr directly
+        try {
+          qrData = await apiCall(`/instance/fetchInstances`);
+          const inst = (Array.isArray(qrData) ? qrData : []).find((i: any) => i.instance?.instanceName === instanceName);
+          qrData = inst?.qrcode ?? null;
+        } catch {}
+      }
+      const base64 = qrData?.base64 ?? qrData?.qrcode?.base64 ?? qrData?.code;
       if (base64) {
         setQrCode(base64);
         setStatus("qr");
