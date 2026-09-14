@@ -7,7 +7,6 @@ import { CartProvider, useCart } from "@/contexts/CartContext";
 import { MenuBrowser } from "@/components/storefront/MenuBrowser";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrency } from "@/lib/format";
-import { sendOrderWhatsApp } from "@/lib/whatsapp";
 
 export default function CardapioPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -392,26 +391,6 @@ function CheckoutModal({
         reference: reference.trim() || null,
         city: company.city,
         state: company.state,
-      });
-    }
-
-    if (phone.trim()) {
-      const { data: companyData } = await supabase
-        .from("companies")
-        .select("pix_key")
-        .eq("id", company.id)
-        .single();
-      sendOrderWhatsApp({
-        instanceName: `foodnex-${company.id}`,
-        phone: phone.trim(),
-        orderCode,
-        customerName: name.trim(),
-        items,
-        total: grandTotal,
-        type,
-        paymentMethod,
-        pixKey: (companyData as any)?.pix_key ?? null,
-        notes: notes.trim() || null,
       });
     }
 

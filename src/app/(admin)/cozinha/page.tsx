@@ -9,7 +9,9 @@ import { OrderCard } from "@/components/admin/OrderCard";
 import { useCompany } from "@/contexts/CompanyContext";
 import { printOrder } from "@/lib/print";
 import { isToday } from "@/lib/format";
+import { sendOrderWhatsApp, sendPickupReadyWhatsApp } from "@/lib/whatsapp";
 import type { PrepTimes } from "@/types/domain";
+import type { CartItem } from "@/contexts/CartContext";
 
 export default function CozinhaPage() {
   const company = useCompany();
@@ -20,6 +22,7 @@ export default function CozinhaPage() {
   const prevAguardandoCount = useRef<number | null>(null);
   const [savingPrepTimes, setSavingPrepTimes] = useState(false);
   const [showConcluidos, setShowConcluidos] = useState(false);
+  const [pixKey, setPixKey] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -29,6 +32,12 @@ export default function CozinhaPage() {
       .eq("company_id", company.id)
       .single()
       .then(({ data }) => setPrepTimes(data));
+    supabase
+      .from("companies")
+      .select("pix_key")
+      .eq("id", company.id)
+      .single()
+      .then(({ data }) => setPixKey((data as any)?.pix_key ?? null));
   }, [company.id]);
 
   const aguardando = orders.filter((o) => o.status === "aguardando_aceite");
@@ -80,6 +89,21 @@ export default function CozinhaPage() {
       .from("orders")
       .update({ status: "em_preparo", accepted_at: new Date().toISOString() })
       .eq("id", orderId);
+    const order = orders.find((o) => o.id === orderId);
+    if (order?.customer_phone) {
+      sendOrderWhatsApp({
+        instanceName: `foodnex-${company.id}`,
+        phone: order.customer_phone,
+        orderCode: order.order_code,
+        customerName: order.customer_name,
+        items: (order.order_items ?? []) as unknown as CartItem[],
+        total: order.total,
+        type: order.type,
+        paymentMethod: order.payment_method ?? "dinheiro",
+        pixKey,
+        notes: order.notes,
+      });
+    }
     refetch();
   }
 
@@ -89,6 +113,15 @@ export default function CozinhaPage() {
       .from("orders")
       .update({ status: "pronto", ready_at: new Date().toISOString() })
       .eq("id", orderId);
+    const order = orders.find((o) => o.id === orderId);
+    if (order?.type === "retirada" && order.customer_phone) {
+      sendPickupReadyWhatsApp({
+        instanceName: `foodnex-${company.id}`,
+        phone: order.customer_phone,
+        orderCode: order.order_code,
+        customerName: order.customer_name,
+      });
+    }
     refetch();
   }
 

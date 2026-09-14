@@ -94,3 +94,50 @@ export async function sendOrderWhatsApp({
     // silently fail — order was already created
   }
 }
+
+async function sendSimpleWhatsApp(instanceName: string, phone: string, message: string) {
+  if (!EVOLUTION_URL || !phone) return;
+  const digits = phone.replace(/\D/g, "");
+  const fullPhone = digits.startsWith("55") ? digits : `55${digits}`;
+  try {
+    await fetch(`${EVOLUTION_URL}/message/sendText/${instanceName}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: EVOLUTION_KEY },
+      body: JSON.stringify({ number: fullPhone, text: message }),
+    });
+  } catch {}
+}
+
+export async function sendDeliveryDispatchedWhatsApp({
+  instanceName, phone, orderCode, customerName,
+}: {
+  instanceName: string;
+  phone: string;
+  orderCode: string;
+  customerName: string;
+}) {
+  const message =
+    `🛵 *Pedido #${orderCode} saiu para entrega!*\n` +
+    `━━━━━━━━━━━━━━━━\n` +
+    `👤 ${customerName}, seu pedido está a caminho!\n` +
+    `━━━━━━━━━━━━━━━━\n` +
+    `_Obrigado pela preferência! 🙏_`;
+  await sendSimpleWhatsApp(instanceName, phone, message);
+}
+
+export async function sendPickupReadyWhatsApp({
+  instanceName, phone, orderCode, customerName,
+}: {
+  instanceName: string;
+  phone: string;
+  orderCode: string;
+  customerName: string;
+}) {
+  const message =
+    `✅ *Pedido #${orderCode} pronto para retirada!*\n` +
+    `━━━━━━━━━━━━━━━━\n` +
+    `👤 ${customerName}, pode vir buscar! 🏃\n` +
+    `━━━━━━━━━━━━━━━━\n` +
+    `_Obrigado pela preferência! 🙏_`;
+  await sendSimpleWhatsApp(instanceName, phone, message);
+}

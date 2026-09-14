@@ -6,6 +6,7 @@ import { useCompany } from "@/contexts/CompanyContext";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrency, formatTime, isToday } from "@/lib/format";
 import { printOrder } from "@/lib/print";
+import { sendDeliveryDispatchedWhatsApp } from "@/lib/whatsapp";
 import type { Order } from "@/types/domain";
 
 type StatusFilter = "pronto" | "saiu_entrega" | "concluidas";
@@ -40,6 +41,15 @@ export default function EntregasPage() {
   async function dispatchOrder(orderId: string) {
     const supabase = createClient();
     await supabase.from("orders").update({ status: "saiu_entrega" }).eq("id", orderId);
+    const order = orders.find((o) => o.id === orderId);
+    if (order?.customer_phone) {
+      sendDeliveryDispatchedWhatsApp({
+        instanceName: `foodnex-${company.id}`,
+        phone: order.customer_phone,
+        orderCode: order.order_code,
+        customerName: order.customer_name,
+      });
+    }
     refetch();
   }
 
