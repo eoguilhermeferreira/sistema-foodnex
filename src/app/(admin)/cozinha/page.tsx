@@ -11,7 +11,6 @@ import { printOrder } from "@/lib/print";
 import { isToday } from "@/lib/format";
 import { sendOrderWhatsApp, sendPickupReadyWhatsApp } from "@/lib/whatsapp";
 import type { PrepTimes } from "@/types/domain";
-import type { CartItem } from "@/contexts/CartContext";
 
 export default function CozinhaPage() {
   const company = useCompany();
@@ -96,12 +95,15 @@ export default function CozinhaPage() {
         phone: order.customer_phone,
         orderCode: order.order_code,
         customerName: order.customer_name,
-        items: (order.order_items ?? []) as unknown as CartItem[],
+        items: order.order_items ?? [],
         total: order.total,
         type: order.type,
         paymentMethod: order.payment_method ?? "dinheiro",
         pixKey,
         notes: order.notes,
+        address: order.addresses?.[0] ?? null,
+        changeFor: order.change_for,
+        createdAt: order.created_at,
       });
     }
     refetch();
@@ -118,7 +120,6 @@ export default function CozinhaPage() {
       sendPickupReadyWhatsApp({
         instanceName: `foodnex-${company.id}`,
         phone: order.customer_phone,
-        orderCode: order.order_code,
         customerName: order.customer_name,
       });
     }

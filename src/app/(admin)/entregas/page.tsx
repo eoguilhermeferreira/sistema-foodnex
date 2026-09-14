@@ -46,7 +46,6 @@ export default function EntregasPage() {
       sendDeliveryDispatchedWhatsApp({
         instanceName: `foodnex-${company.id}`,
         phone: order.customer_phone,
-        orderCode: order.order_code,
         customerName: order.customer_name,
       });
     }
