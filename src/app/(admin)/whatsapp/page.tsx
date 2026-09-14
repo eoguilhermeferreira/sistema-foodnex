@@ -78,7 +78,7 @@ export default function WhatsAppPage() {
     setStatus("loading");
     setErrorMsg("");
     try {
-      // create instance (v2: qr comes in the response)
+      // create instance
       let createData: any = null;
       try {
         createData = await apiCall("/instance/create", "POST", {
@@ -86,23 +86,26 @@ export default function WhatsAppPage() {
           qrcode: true,
           integration: "WHATSAPP-BAILEYS",
         });
-      } catch {
-        // instance may already exist — ignore
+        console.log("createData", JSON.stringify(createData));
+      } catch (err) {
+        console.log("create error (may already exist)", err);
       }
 
-      // try to get base64 from create response first (v2.3+)
-      let base64 =
-        createData?.qrcode?.base64 ??
-        createData?.base64 ??
-        createData?.qr?.base64 ??
-        null;
-
-      // fallback: /instance/connect
-      if (!base64) {
-        try {
-          const qrData = await apiCall(`/instance/connect/${instanceName}`);
-          base64 = qrData?.base64 ?? qrData?.qrcode?.base64 ?? qrData?.code ?? null;
-        } catch {}
+      // try /instance/connect to get QR
+      let base64: string | null = null;
+      try {
+        const qrData = await apiCall(`/instance/connect/${instanceName}`);
+        console.log("qrData", JSON.stringify(qrData));
+        base64 =
+          qrData?.base64 ??
+          qrData?.qrcode?.base64 ??
+          qrData?.code ??
+          createData?.qrcode?.base64 ??
+          createData?.base64 ??
+          null;
+      } catch (err) {
+        console.log("connect error", err);
+        base64 = createData?.qrcode?.base64 ?? createData?.base64 ?? null;
       }
       if (base64) {
         setQrCode(base64);
