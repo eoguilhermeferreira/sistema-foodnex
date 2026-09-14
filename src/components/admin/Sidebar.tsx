@@ -13,6 +13,7 @@ const menuItems = [
   { href: "/mesas", label: "Mesas" },
   { href: "/cardapio", label: "Cardápio" },
   { href: "/relatorios", label: "Relatórios" },
+  { href: "/whatsapp", label: "WhatsApp" },
   { href: "/configuracoes", label: "Configurações" },
 ];
 
