@@ -62,6 +62,11 @@ export default function WhatsAppPage() {
     }
   }, [instanceName]);
 
+  // check status on mount
+  useEffect(() => {
+    checkStatus();
+  }, [checkStatus]);
+
   // poll while waiting for QR scan
   useEffect(() => {
     if (status !== "qr") return;
