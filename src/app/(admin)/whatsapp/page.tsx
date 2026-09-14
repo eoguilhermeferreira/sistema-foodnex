@@ -18,7 +18,7 @@ async function apiCall(path: string, method = "GET", body?: object) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new Error(`Erro ${res.status}`);
+  if (!res.ok && res.status !== 409) throw new Error(`Erro ${res.status}`);
   return res.json();
 }
 
@@ -78,34 +78,29 @@ export default function WhatsAppPage() {
     setStatus("loading");
     setErrorMsg("");
     try {
-      // create instance
+      // create instance (409 = already exists, that's ok)
       let createData: any = null;
-      try {
-        createData = await apiCall("/instance/create", "POST", {
-          instanceName,
-          qrcode: true,
-          integration: "WHATSAPP-BAILEYS",
-        });
-        console.log("createData", JSON.stringify(createData));
-      } catch (err) {
-        console.log("create error (may already exist)", err);
-      }
+      createData = await apiCall("/instance/create", "POST", {
+        instanceName,
+        qrcode: true,
+        integration: "WHATSAPP-BAILEYS",
+      });
+      console.log("createData", JSON.stringify(createData));
 
-      // try /instance/connect to get QR
-      let base64: string | null = null;
-      try {
-        const qrData = await apiCall(`/instance/connect/${instanceName}`);
-        console.log("qrData", JSON.stringify(qrData));
-        base64 =
-          qrData?.base64 ??
-          qrData?.qrcode?.base64 ??
-          qrData?.code ??
-          createData?.qrcode?.base64 ??
-          createData?.base64 ??
-          null;
-      } catch (err) {
-        console.log("connect error", err);
-        base64 = createData?.qrcode?.base64 ?? createData?.base64 ?? null;
+      // get QR from create response or from connect
+      let base64: string | null =
+        createData?.qrcode?.base64 ??
+        createData?.base64 ??
+        null;
+
+      if (!base64) {
+        try {
+          const qrData = await apiCall(`/instance/connect/${instanceName}`);
+          console.log("qrData", JSON.stringify(qrData));
+          base64 = qrData?.base64 ?? qrData?.qrcode?.base64 ?? qrData?.code ?? null;
+        } catch (err) {
+          console.log("connect error", err);
+        }
       }
       if (base64) {
         setQrCode(base64);
