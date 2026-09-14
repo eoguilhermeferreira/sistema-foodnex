@@ -18,7 +18,7 @@ async function apiCall(path: string, method = "GET", body?: object) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok && res.status !== 409) throw new Error(`Erro ${res.status}`);
+  if (!res.ok && res.status !== 409 && res.status !== 403) throw new Error(`Erro ${res.status}`);
   return res.json();
 }
 
