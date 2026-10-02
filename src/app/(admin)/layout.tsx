@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <CompanyProvider company={company}>
       <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar companyName={company.fantasy_name ?? company.name} />
-        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 pb-20 pt-[calc(1rem+53px)] md:p-8 md:pb-8 md:pt-8">{children}</main>
       </div>
     </CompanyProvider>
   );
