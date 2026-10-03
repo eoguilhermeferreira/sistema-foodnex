@@ -78,7 +78,7 @@ export default function EntregasPage() {
     <div>
       <h1 className="text-2xl font-semibold text-foreground">Entregas</h1>
 
-      <div className="mt-4 grid grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-3 gap-3 md:gap-4">
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <p className="text-sm text-muted">Prontos para sair</p>
           <p className="mt-1 text-xl font-semibold text-foreground">{prontos.length}</p>

@@ -159,29 +159,73 @@ export default function CozinhaPage() {
     <div>
       <h1 className="text-2xl font-semibold text-foreground">Cozinha</h1>
 
-      <div className="mt-4 grid grid-cols-4 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
-          <p className="text-sm text-muted">Aguardando aceite</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{aguardando.length}</p>
+      {/* Stats — 2 cols on mobile, 4 on desktop */}
+      <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <div className="rounded-xl border border-border bg-card p-3 text-center md:p-4">
+          <p className="text-xs text-muted md:text-sm">Aguardando aceite</p>
+          <p className="mt-1 text-lg font-semibold text-foreground md:text-xl">{aguardando.length}</p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
-          <p className="text-sm text-muted">Em preparo</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{emPreparo.length}</p>
+        <div className="rounded-xl border border-border bg-card p-3 text-center md:p-4">
+          <p className="text-xs text-muted md:text-sm">Em preparo</p>
+          <p className="mt-1 text-lg font-semibold text-foreground md:text-xl">{emPreparo.length}</p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
-          <p className="text-sm text-muted">Prontos</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{prontos.length}</p>
+        <div className="rounded-xl border border-border bg-card p-3 text-center md:p-4">
+          <p className="text-xs text-muted md:text-sm">Prontos</p>
+          <p className="mt-1 text-lg font-semibold text-foreground md:text-xl">{prontos.length}</p>
         </div>
         <button
           onClick={() => setShowConcluidos((v) => !v)}
-          className="rounded-xl border border-border bg-card p-4 text-center hover:bg-card-hover transition-colors"
+          className="rounded-xl border border-border bg-card p-3 text-center hover:bg-card-hover transition-colors md:p-4"
         >
-          <p className="text-sm text-muted">Concluídos hoje</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{concluidosHoje.length}</p>
+          <p className="text-xs text-muted md:text-sm">Concluídos hoje</p>
+          <p className="mt-1 text-lg font-semibold text-foreground md:text-xl">{concluidosHoje.length}</p>
         </button>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-4">
+      {/* Tempo Médio — compact bar on mobile only, hidden on desktop (shown in sidebar) */}
+      {prepTimes && (
+        <div className="mt-4 lg:hidden rounded-xl border border-border bg-card px-4 py-3">
+          <p className="text-xs font-medium text-muted mb-2">Tempo Médio (min)</p>
+          <div className="flex gap-3">
+            <label className="flex flex-1 items-center gap-2 text-xs text-muted">
+              Entrega
+              <input
+                type="number"
+                value={prepTimes.delivery_minutes}
+                onChange={(e) => setPrepTimes({ ...prepTimes, delivery_minutes: Number(e.target.value) })}
+                className="w-14 rounded-lg border border-border bg-card-hover px-2 py-1 text-sm text-foreground text-center"
+              />
+            </label>
+            <label className="flex flex-1 items-center gap-2 text-xs text-muted">
+              Retirada
+              <input
+                type="number"
+                value={prepTimes.pickup_minutes}
+                onChange={(e) => setPrepTimes({ ...prepTimes, pickup_minutes: Number(e.target.value) })}
+                className="w-14 rounded-lg border border-border bg-card-hover px-2 py-1 text-sm text-foreground text-center"
+              />
+            </label>
+            <label className="flex flex-1 items-center gap-2 text-xs text-muted">
+              Mesa
+              <input
+                type="number"
+                value={prepTimes.table_minutes}
+                onChange={(e) => setPrepTimes({ ...prepTimes, table_minutes: Number(e.target.value) })}
+                className="w-14 rounded-lg border border-border bg-card-hover px-2 py-1 text-sm text-foreground text-center"
+              />
+            </label>
+            <button
+              onClick={savePrepTimes}
+              disabled={savingPrepTimes}
+              className="rounded-lg bg-wine px-3 py-1 text-xs font-medium text-white hover:bg-wine-hover disabled:opacity-50"
+            >
+              {savingPrepTimes ? "..." : "Salvar"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-4">
         <div className="lg:col-span-3 space-y-3">
           {activeOrders.length === 0 && !showConcluidos && (
             <p className="text-sm text-muted">Nenhum pedido em andamento.</p>
@@ -254,7 +298,8 @@ export default function CozinhaPage() {
           ))}
         </div>
 
-        <div>
+        {/* Desktop: Tempo Médio sidebar */}
+        <div className="hidden lg:block">
           <h2 className="text-lg font-medium text-foreground">Tempo Médio</h2>
           {prepTimes && (
             <div className="mt-3 space-y-4 rounded-xl border border-border bg-card p-4">

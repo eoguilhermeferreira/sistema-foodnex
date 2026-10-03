@@ -7,11 +7,31 @@ import { createClient } from "@/lib/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import type { TableRestaurant } from "@/types/domain";
 
-const statusStyles: Record<string, string> = {
-  livre: "border-border bg-card text-muted",
-  ocupada: "border-wine bg-wine/20 text-foreground",
-  encerrada: "border-yellow-500 bg-yellow-500/10 text-yellow-400",
+const statusStyles: Record<string, { card: string; label: string }> = {
+  livre:     { card: "border-green-500/60 bg-green-500/10",  label: "text-green-400" },
+  ocupada:   { card: "border-red-500/60   bg-red-500/10",    label: "text-red-400"   },
+  encerrada: { card: "border-yellow-500/60 bg-yellow-500/10", label: "text-yellow-400" },
 };
+
+function TableIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 36" fill="none" className={className} aria-hidden>
+      {/* tabletop */}
+      <rect x="6" y="13" width="28" height="10" rx="2" fill="currentColor" opacity="0.9" />
+      {/* left leg */}
+      <rect x="10" y="23" width="3" height="7" rx="1.5" fill="currentColor" opacity="0.7" />
+      {/* right leg */}
+      <rect x="27" y="23" width="3" height="7" rx="1.5" fill="currentColor" opacity="0.7" />
+      {/* chair top */}
+      <rect x="14" y="4" width="12" height="5" rx="2" fill="currentColor" opacity="0.55" />
+      {/* chair bottom */}
+      <rect x="14" y="4" width="12" height="10" rx="2" fill="currentColor" opacity="0.25" />
+      {/* chair bottom legs */}
+      <rect x="15" y="8" width="2" height="5" rx="1" fill="currentColor" opacity="0.4" />
+      <rect x="23" y="8" width="2" height="5" rx="1" fill="currentColor" opacity="0.4" />
+    </svg>
+  );
+}
 
 export default function MesasPage() {
   const company = useCompany();
@@ -106,13 +126,13 @@ export default function MesasPage() {
       <h1 className="text-2xl font-semibold text-foreground">Mesas</h1>
 
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
-          <p className="text-sm text-muted">Mesas livres</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{livres}</p>
+        <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 text-center">
+          <p className="text-sm text-green-400">Mesas livres</p>
+          <p className="mt-1 text-xl font-semibold text-green-400">{livres}</p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
-          <p className="text-sm text-muted">Mesas ocupadas</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{ocupadas}</p>
+        <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-center">
+          <p className="text-sm text-red-400">Mesas ocupadas</p>
+          <p className="mt-1 text-xl font-semibold text-red-400">{ocupadas}</p>
         </div>
       </div>
 
@@ -138,20 +158,24 @@ export default function MesasPage() {
             {tables.length === 0 && (
               <p className="col-span-full text-sm text-muted">Nenhuma mesa cadastrada.</p>
             )}
-            {tables.map((table) => (
-              <button
-                key={table.id}
-                onClick={() => setSelectedId(table.id)}
-                className={`flex aspect-square flex-col items-center justify-center rounded-xl border-2 transition-colors ${
-                  statusStyles[table.status]
-                } ${selectedId === table.id ? "ring-2 ring-wine" : ""}`}
-              >
-                <span className="text-lg font-semibold">{table.number}</span>
-                <span className="text-xs">
-                  {table.table_customers?.length ? `${table.table_customers.length} comanda(s)` : table.status}
-                </span>
-              </button>
-            ))}
+            {tables.map((table) => {
+              const style = statusStyles[table.status] ?? statusStyles.livre;
+              return (
+                <button
+                  key={table.id}
+                  onClick={() => setSelectedId(table.id)}
+                  className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 transition-colors ${style.card} ${selectedId === table.id ? "ring-2 ring-wine" : ""}`}
+                >
+                  <TableIcon className={`h-8 w-8 ${style.label}`} />
+                  <span className={`text-base font-bold leading-none ${style.label}`}>{table.number}</span>
+                  <span className={`text-[10px] leading-none ${style.label} opacity-80`}>
+                    {table.table_customers?.length
+                      ? `${table.table_customers.length} comanda${table.table_customers.length > 1 ? "s" : ""}`
+                      : table.status === "livre" ? "Livre" : table.status === "ocupada" ? "Ocupada" : "Encerrada"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

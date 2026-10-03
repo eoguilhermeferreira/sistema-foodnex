@@ -29,7 +29,7 @@ export function OrderCard({ order, children }: OrderCardProps) {
         </span>
       </div>
 
-      <div className="mt-3 flex items-center gap-3 text-sm text-muted">
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted">
         <span>{orderTypeLabels[order.type]}</span>
         <span>•</span>
         <span>{formatTime(order.created_at)}</span>
@@ -116,7 +116,7 @@ export function OrderCard({ order, children }: OrderCardProps) {
 
       {order.notes && <p className="mt-2 border-t border-border pt-2 text-sm italic text-muted">Obs geral: {order.notes}</p>}
 
-      {children && <div className="mt-4 flex gap-2">{children}</div>}
+      {children && <div className="mt-4 flex flex-wrap gap-2">{children}</div>}
     </div>
   );
 }
