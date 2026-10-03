@@ -27,6 +27,12 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  overflow-x: hidden;
+}
+
+/* Prevent iOS zoom on input focus */
+input, textarea, select {
+  font-size: max(16px, 1em);
 }
 
 @media print {

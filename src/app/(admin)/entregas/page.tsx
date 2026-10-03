@@ -95,7 +95,7 @@ export default function EntregasPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="text"
               placeholder="Buscar por cliente..."
@@ -103,10 +103,10 @@ export default function EntregasPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="flex-1 rounded-lg border border-border bg-card-hover px-3 py-2 text-sm text-foreground"
             />
-            <div className="flex gap-1 rounded-lg bg-card-hover p-1">
+            <div className="flex gap-1 rounded-lg bg-card-hover p-1 self-start sm:self-auto">
               <button
                 onClick={() => setStatusFilter("pronto")}
-                className={`rounded-md px-3 py-1 text-sm ${
+                className={`rounded-md px-3 py-1.5 text-sm ${
                   statusFilter === "pronto" ? "bg-wine text-white" : "text-muted"
                 }`}
               >
@@ -114,7 +114,7 @@ export default function EntregasPage() {
               </button>
               <button
                 onClick={() => setStatusFilter("saiu_entrega")}
-                className={`rounded-md px-3 py-1 text-sm ${
+                className={`rounded-md px-3 py-1.5 text-sm ${
                   statusFilter === "saiu_entrega" ? "bg-wine text-white" : "text-muted"
                 }`}
               >
@@ -122,7 +122,7 @@ export default function EntregasPage() {
               </button>
               <button
                 onClick={() => setStatusFilter("concluidas")}
-                className={`rounded-md px-3 py-1 text-sm ${
+                className={`rounded-md px-3 py-1.5 text-sm ${
                   statusFilter === "concluidas" ? "bg-wine text-white" : "text-muted"
                 }`}
               >
