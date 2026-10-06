@@ -55,22 +55,21 @@ export default function GarcomPublicPage() {
 
   // auto-subscribe if already granted (e.g. returning user)
   useEffect(() => {
-    if (notifPermission === "granted" && company) {
-      subscribePush(company.id);
+    if (notifPermission === "granted" && company && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+      subscribePush(company.id).catch(() => {});
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifPermission, company]);
 
   async function subscribePush(companyId: string) {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!vapidKey || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
     try {
       const reg = await navigator.serviceWorker.ready;
       const existing = await reg.pushManager.getSubscription();
       const sub = existing ?? await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-        ),
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
       await fetch("/api/push/subscribe", {
         method: "POST",
@@ -82,9 +81,11 @@ export default function GarcomPublicPage() {
 
   async function requestNotifPermission() {
     if (!("Notification" in window)) return;
-    const p = await Notification.requestPermission();
-    setNotifPermission(p);
-    if (p === "granted" && company) await subscribePush(company.id);
+    try {
+      const p = await Notification.requestPermission();
+      setNotifPermission(p);
+      if (p === "granted" && company) await subscribePush(company.id);
+    } catch {}
   }
 
   const fetchCalls = useCallback(async () => {
