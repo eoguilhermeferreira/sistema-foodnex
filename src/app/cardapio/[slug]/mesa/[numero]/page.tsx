@@ -200,27 +200,27 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
         <div className="w-full max-w-xs text-center">
-          {/* Restaurant name + welcome */}
-          <p className="text-lg font-bold text-foreground">{company?.name}</p>
-          <p className="mt-1 text-sm text-muted">Seja bem-vindo(a)! 🎉</p>
+          {/* Welcome header */}
+          <p className="text-2xl font-black uppercase tracking-wide text-foreground">Seja bem-vindo!</p>
+          <p className="mt-1 text-base font-semibold text-wine">{company?.fantasy_name ?? company?.name}</p>
 
-          {/* Table confirmation */}
+          {/* Table identification */}
           <div className="my-8 rounded-2xl border-2 border-wine bg-wine/5 px-8 py-6">
             <p className="text-xs font-semibold uppercase tracking-widest text-wine">Você está na</p>
             <p className="mt-1 text-7xl font-black text-foreground leading-none">{numero}</p>
             <p className="mt-1 text-sm font-medium text-muted">Mesa {numero}</p>
           </div>
 
-          <p className="text-sm text-muted mb-4">Informe seu nome para abrir sua comanda.</p>
+          <p className="text-sm text-muted mb-4">Digite seu nome para entrar no cardápio.</p>
           <input
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && joinTable()}
-            placeholder="Seu nome"
+            placeholder="Digite seu nome"
             className="w-full rounded-lg border border-border bg-card-hover px-3 py-2.5 text-sm text-foreground"
           />
           <button onClick={joinTable} disabled={!nameInput.trim()} className="mt-3 w-full rounded-lg bg-wine px-4 py-3 text-sm font-semibold text-white hover:bg-wine-hover disabled:opacity-40">
-            Entrar na mesa
+            Entrar no cardápio
           </button>
         </div>
       </div>
@@ -300,11 +300,9 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
           </div>
         )}
 
-        {prepTimes && (prepTimes.delivery_minutes > 0 || prepTimes.pickup_minutes > 0 || prepTimes.table_minutes > 0) && (
+        {prepTimes && prepTimes.table_minutes > 0 && (
           <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5">
-            {prepTimes.delivery_minutes > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">🛵 Entrega {prepTimes.delivery_minutes} min</span>}
-            {prepTimes.pickup_minutes > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">🏃 Retirada {prepTimes.pickup_minutes} min</span>}
-            {prepTimes.table_minutes > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">🍽️ Mesa {prepTimes.table_minutes} min</span>}
+            <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">🍽️ Mesa {prepTimes.table_minutes} min</span>
           </div>
         )}
 

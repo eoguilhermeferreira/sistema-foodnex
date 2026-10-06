@@ -192,7 +192,8 @@ export default function CozinhaPage() {
               <input
                 type="number"
                 value={prepTimes.delivery_minutes}
-                onChange={(e) => setPrepTimes({ ...prepTimes, delivery_minutes: Number(e.target.value) })}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setPrepTimes({ ...prepTimes, delivery_minutes: parseInt(e.target.value) || 0 })}
                 className="w-14 rounded-lg border border-border bg-card-hover px-2 py-1 text-sm text-foreground text-center"
               />
             </label>
@@ -201,7 +202,8 @@ export default function CozinhaPage() {
               <input
                 type="number"
                 value={prepTimes.pickup_minutes}
-                onChange={(e) => setPrepTimes({ ...prepTimes, pickup_minutes: Number(e.target.value) })}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setPrepTimes({ ...prepTimes, pickup_minutes: parseInt(e.target.value) || 0 })}
                 className="w-14 rounded-lg border border-border bg-card-hover px-2 py-1 text-sm text-foreground text-center"
               />
             </label>
@@ -210,7 +212,8 @@ export default function CozinhaPage() {
               <input
                 type="number"
                 value={prepTimes.table_minutes}
-                onChange={(e) => setPrepTimes({ ...prepTimes, table_minutes: Number(e.target.value) })}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setPrepTimes({ ...prepTimes, table_minutes: parseInt(e.target.value) || 0 })}
                 className="w-14 rounded-lg border border-border bg-card-hover px-2 py-1 text-sm text-foreground text-center"
               />
             </label>
@@ -308,9 +311,8 @@ export default function CozinhaPage() {
                 <input
                   type="number"
                   value={prepTimes.delivery_minutes}
-                  onChange={(e) =>
-                    setPrepTimes({ ...prepTimes, delivery_minutes: Number(e.target.value) })
-                  }
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setPrepTimes({ ...prepTimes, delivery_minutes: parseInt(e.target.value) || 0 })}
                   className="mt-1 w-full rounded-lg border border-border bg-card-hover px-3 py-2 text-foreground"
                 />
               </label>
@@ -319,9 +321,8 @@ export default function CozinhaPage() {
                 <input
                   type="number"
                   value={prepTimes.pickup_minutes}
-                  onChange={(e) =>
-                    setPrepTimes({ ...prepTimes, pickup_minutes: Number(e.target.value) })
-                  }
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setPrepTimes({ ...prepTimes, pickup_minutes: parseInt(e.target.value) || 0 })}
                   className="mt-1 w-full rounded-lg border border-border bg-card-hover px-3 py-2 text-foreground"
                 />
               </label>
@@ -330,9 +331,8 @@ export default function CozinhaPage() {
                 <input
                   type="number"
                   value={prepTimes.table_minutes}
-                  onChange={(e) =>
-                    setPrepTimes({ ...prepTimes, table_minutes: Number(e.target.value) })
-                  }
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setPrepTimes({ ...prepTimes, table_minutes: parseInt(e.target.value) || 0 })}
                   className="mt-1 w-full rounded-lg border border-border bg-card-hover px-3 py-2 text-foreground"
                 />
               </label>
