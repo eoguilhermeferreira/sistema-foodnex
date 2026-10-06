@@ -55,6 +55,7 @@ export interface Order {
   ready_at: string | null;
   concluded_at: string | null;
   archived_at: string | null;
+  table_number?: number | null;
   order_items?: OrderItem[];
   addresses?: Address[];
 }

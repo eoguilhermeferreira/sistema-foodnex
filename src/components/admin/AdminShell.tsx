@@ -4,9 +4,25 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "./Sidebar";
 
+// Singleton AudioContext — desbloqueado no primeiro toque do usuário
+let audioCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    } catch { return null; }
+  }
+  return audioCtx;
+}
+
 function playNotificationSound() {
   try {
-    const ctx = new AudioContext();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume();
+
     const o1 = ctx.createOscillator();
     const o2 = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -60,6 +76,17 @@ export function AdminShell({ companyId, companyName, children }: Props) {
   }, [companyId]);
 
   useEffect(() => {
+    // desbloqueia AudioContext no primeiro toque (necessário para iOS/Android)
+    const unlock = () => { getAudioContext()?.resume(); };
+    window.addEventListener("touchstart", unlock, { once: true });
+    window.addEventListener("click", unlock, { once: true });
+    return () => {
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("click", unlock);
+    };
+  }, []);
+
+  useEffect(() => {
     fetchCounts();
 
     const supabase = createClient();
@@ -95,8 +122,12 @@ export function AdminShell({ companyId, companyName, children }: Props) {
         initializedRef.current = true;
       });
 
+    // polling fallback — garante atualização mesmo se WebSocket cair (mobile)
+    const poll = setInterval(fetchCounts, 15000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(poll);
     };
   }, [companyId, fetchCounts]);
 

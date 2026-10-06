@@ -41,7 +41,9 @@ export default function GarcomPage() {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    const poll = setInterval(fetchCalls, 15000);
+
+    return () => { supabase.removeChannel(channel); clearInterval(poll); };
   }, [company.id, fetchCalls]);
 
   async function attend(id: string) {
