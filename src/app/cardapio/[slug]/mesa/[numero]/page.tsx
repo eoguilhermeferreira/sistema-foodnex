@@ -302,15 +302,31 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
         )}
 
         {/* mesa info bar */}
-        <div className="mt-3 flex items-center gap-2 rounded-xl border border-wine/30 bg-wine/5 px-4 py-2.5">
-          <span className="text-sm font-semibold text-wine">Mesa {numero}</span>
-          <span className="text-muted">·</span>
-          <span className="text-sm text-muted">{customer.name}</span>
-          {(customer.subtotal ?? 0) > 0 && (
-            <>
-              <span className="text-muted">·</span>
-              <span className="text-sm text-muted">Consumido: {formatCurrency(customer.subtotal ?? 0)}</span>
-            </>
+        <div className="mt-3 rounded-xl border border-wine/30 bg-wine/5 px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-wine">Mesa {numero}</span>
+            <span className="text-muted">·</span>
+            <span className="text-sm text-muted">{customer.name}</span>
+            {(customer.subtotal ?? 0) > 0 && (
+              <>
+                <span className="text-muted">·</span>
+                <span className="text-sm text-muted">Consumido: {formatCurrency(customer.subtotal ?? 0)}</span>
+              </>
+            )}
+          </div>
+          {waiterStatus === "idle" && (
+            <button
+              onClick={callWaiter}
+              disabled={callingWaiter}
+              className="mt-2 w-full rounded-lg border border-wine/40 bg-wine/10 px-3 py-2 text-sm font-medium text-wine hover:bg-wine/20 disabled:opacity-50"
+            >
+              {callingWaiter ? "Chamando..." : "🔔 Chamar Garçom"}
+            </button>
+          )}
+          {waiterStatus === "pendente" && (
+            <div className="mt-2 w-full rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-center text-sm font-medium text-yellow-400">
+              Aguardando garçom...
+            </div>
           )}
         </div>
       </div>
@@ -359,20 +375,6 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
       )}
 
       <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 space-y-2">
-        {waiterStatus === "idle" && (
-          <button
-            onClick={callWaiter}
-            disabled={callingWaiter}
-            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-lg hover:bg-card-hover disabled:opacity-50"
-          >
-            {callingWaiter ? "Chamando..." : "🔔 Chamar Garçom"}
-          </button>
-        )}
-        {waiterStatus === "pendente" && (
-          <div className="w-full rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-center text-sm font-medium text-yellow-400 shadow-lg">
-            Chamando garçom... aguarde
-          </div>
-        )}
         {items.length > 0 && company.is_open && (
           <div className="rounded-xl bg-card p-3 shadow-lg">
             <p className="text-sm text-muted">{items.length} item(ns) — {formatCurrency(total)}</p>
