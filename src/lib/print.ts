@@ -128,7 +128,7 @@ export function printOrder(order: Order) {
         <hr/>
         <p><strong>Cliente:</strong> <span style="color:#111;font-weight:600;">${order.customer_name}</span></p>
         ${order.customer_phone ? `<p><strong>Tel:</strong> <span style="color:#111;font-weight:600;">${order.customer_phone}</span></p>` : ""}
-        <p><strong>Tipo:</strong> <span style="color:#111;font-weight:600;">${orderTypeLabels[order.type]}</span></p>
+        <p><strong>Tipo:</strong> <span style="color:#111;font-weight:600;">${orderTypeLabels[order.type]}${order.type === "mesa" && order.table_number ? ` — Mesa ${order.table_number}` : ""}</span></p>
         ${addressHtml}
         <p><strong>Pagamento:</strong> <span style="color:#111;font-weight:600;">${paymentLabels[order.payment_method ?? ""] ?? order.payment_method ?? "-"}</span></p>
         ${changePart}

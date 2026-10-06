@@ -67,7 +67,10 @@ export default function GarcomPublicPage() {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // polling fallback — garante atualização mesmo se WebSocket cair (mobile)
+    const poll = setInterval(fetchCalls, 15000);
+
+    return () => { supabase.removeChannel(channel); clearInterval(poll); };
   }, [company, fetchCalls]);
 
   async function attend(id: string) {

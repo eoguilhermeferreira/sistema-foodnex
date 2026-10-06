@@ -12,11 +12,15 @@ export function useRealtimeOrders(companyId: string) {
     const supabase = createClient();
     const { data } = await supabase
       .from("orders")
-      .select("*, order_items(*), addresses(*)")
+      .select("*, order_items(*), addresses(*), tables_restaurant(number)")
       .eq("company_id", companyId)
       .order("created_at", { ascending: true });
 
-    setOrders((data as unknown as Order[]) ?? []);
+    const normalized = (data ?? []).map((o: any) => ({
+      ...o,
+      table_number: o.tables_restaurant?.number ?? null,
+    }));
+    setOrders(normalized as unknown as Order[]);
     setLoading(false);
   }, [companyId]);
 
@@ -43,8 +47,12 @@ export function useRealtimeOrders(companyId: string) {
       )
       .subscribe();
 
+    // polling fallback — garante atualização mesmo se WebSocket cair (mobile)
+    const poll = setInterval(fetchOrders, 15000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(poll);
     };
   }, [companyId, fetchOrders]);
 
