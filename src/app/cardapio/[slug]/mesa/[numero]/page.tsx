@@ -38,6 +38,9 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
   const [loadingTable, setLoadingTable] = useState(true);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [waiterCallId, setWaiterCallId] = useState<string | null>(null);
+  const [waiterStatus, setWaiterStatus] = useState<"idle" | "pendente" | "atendendo">("idle");
+  const [callingWaiter, setCallingWaiter] = useState(false);
 
   useEffect(() => {
     if (!company) return;
@@ -83,6 +86,46 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
       setCustomer(created as unknown as TableCustomer);
       window.localStorage.setItem(`comanda:${company.id}:mesa:${numero}`, created.id);
     }
+  }
+
+  useEffect(() => {
+    if (!waiterCallId) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`waiter-call-${waiterCallId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "waiter_calls", filter: `id=eq.${waiterCallId}` },
+        (payload) => {
+          const status = (payload.new as { status: string }).status;
+          if (status === "atendendo") setWaiterStatus("atendendo");
+          if (status === "concluido") { setWaiterStatus("idle"); setWaiterCallId(null); }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [waiterCallId]);
+
+  async function callWaiter() {
+    if (!company || !tableId || !customer || callingWaiter) return;
+    setCallingWaiter(true);
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("waiter_calls")
+      .insert({
+        company_id: company.id,
+        table_id: tableId,
+        table_number: Number(numero),
+        customer_name: customer.name,
+        status: "pendente",
+      })
+      .select()
+      .single();
+    if (data) {
+      setWaiterCallId((data as { id: string }).id);
+      setWaiterStatus("pendente");
+    }
+    setCallingWaiter(false);
   }
 
   async function sendOrder() {
@@ -289,24 +332,60 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
         </div>
       )}
 
+      {waiterStatus === "atendendo" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-card px-8 py-10 text-center shadow-2xl">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
+              <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-green-400">
+                <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <p className="text-lg font-bold text-foreground">Garçom a caminho!</p>
+            <p className="text-sm text-muted">Aguarde um momento.</p>
+            <button
+              onClick={() => { setWaiterStatus("idle"); setWaiterCallId(null); }}
+              className="mt-2 rounded-lg border border-border px-4 py-2 text-sm text-muted hover:bg-card-hover"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
       {!company.is_open && (
         <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-xl bg-zinc-800 px-4 py-3 shadow-lg text-center">
           <p className="text-sm font-semibold text-white">🔒 Estamos fechados no momento</p>
         </div>
       )}
 
-      {items.length > 0 && company.is_open && (
-        <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-xl bg-card p-3 shadow-lg">
-          <p className="text-sm text-muted">{items.length} item(ns) — {formatCurrency(total)}</p>
+      <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 space-y-2">
+        {waiterStatus === "idle" && (
           <button
-            onClick={sendOrder}
-            disabled={sending}
-            className="mt-2 w-full rounded-lg bg-wine px-4 py-2 text-sm font-medium text-white hover:bg-wine-hover disabled:opacity-50"
+            onClick={callWaiter}
+            disabled={callingWaiter}
+            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-lg hover:bg-card-hover disabled:opacity-50"
           >
-            {sending ? "Enviando..." : "Enviar pedido para a cozinha"}
+            {callingWaiter ? "Chamando..." : "🔔 Chamar Garçom"}
           </button>
-        </div>
-      )}
+        )}
+        {waiterStatus === "pendente" && (
+          <div className="w-full rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-center text-sm font-medium text-yellow-400 shadow-lg">
+            Chamando garçom... aguarde
+          </div>
+        )}
+        {items.length > 0 && company.is_open && (
+          <div className="rounded-xl bg-card p-3 shadow-lg">
+            <p className="text-sm text-muted">{items.length} item(ns) — {formatCurrency(total)}</p>
+            <button
+              onClick={sendOrder}
+              disabled={sending}
+              className="mt-2 w-full rounded-lg bg-wine px-4 py-2 text-sm font-medium text-white hover:bg-wine-hover disabled:opacity-50"
+            >
+              {sending ? "Enviando..." : "Enviar pedido para a cozinha"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

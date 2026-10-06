@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   DashboardIcon, KitchenIcon, PickupIcon, DeliveryIcon, TableIcon,
   MenuIcon, ReportsIcon, WhatsAppIcon, SettingsIcon,
-  HamburgerIcon, CloseIcon, LogoutIcon,
+  HamburgerIcon, CloseIcon, LogoutIcon, WaiterIcon,
 } from "@/components/icons";
 
 const menuItems = [
@@ -17,6 +17,7 @@ const menuItems = [
   { href: "/retiradas",     label: "Retiradas",      Icon: PickupIcon     },
   { href: "/entregas",      label: "Entregas",       Icon: DeliveryIcon   },
   { href: "/mesas",         label: "Mesas",          Icon: TableIcon      },
+  { href: "/garcom",        label: "Garçom",         Icon: WaiterIcon     },
   { href: "/cardapio",      label: "Cardápio",       Icon: MenuIcon       },
   { href: "/relatorios",    label: "Relatórios",     Icon: ReportsIcon    },
   { href: "/whatsapp",      label: "WhatsApp",       Icon: WhatsAppIcon   },
@@ -28,10 +29,11 @@ const bottomNavItems = menuItems.slice(0, 5);
 interface SidebarProps {
   companyName: string;
   badges?: Partial<Record<string, number>>;
-  pending?: boolean;
+  pendingKitchen?: boolean;
+  pendingWaiter?: boolean;
 }
 
-export function Sidebar({ companyName, badges = {}, pending = false }: SidebarProps) {
+export function Sidebar({ companyName, badges = {}, pendingKitchen = false, pendingWaiter = false }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -76,7 +78,7 @@ export function Sidebar({ companyName, badges = {}, pending = false }: SidebarPr
                   {label}
                 </span>
                 {!!badge && (
-                  <span className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-semibold text-white ${pending && href === "/cozinha" ? "animate-pulse" : ""}`}>
+                  <span className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-semibold text-white ${(pendingKitchen && href === "/cozinha") || (pendingWaiter && href === "/garcom") ? "animate-pulse" : ""}`}>
                     {badge}
                   </span>
                 )}
@@ -148,7 +150,7 @@ export function Sidebar({ companyName, badges = {}, pending = false }: SidebarPr
                       {label}
                     </span>
                     {!!badge && (
-                      <span className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-semibold text-white ${pending && href === "/cozinha" ? "animate-pulse" : ""}`}>
+                      <span className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-semibold text-white ${(pendingKitchen && href === "/cozinha") || (pendingWaiter && href === "/garcom") ? "animate-pulse" : ""}`}>
                         {badge}
                       </span>
                     )}
@@ -184,7 +186,7 @@ export function Sidebar({ companyName, badges = {}, pending = false }: SidebarPr
               <Icon className="h-5 w-5" />
               <span className="mt-0.5 leading-none">{label}</span>
               {!!badge && (
-                <span className={`absolute top-1 right-[calc(50%-14px)] flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-0.5 text-[10px] font-semibold text-white ${pending && href === "/cozinha" ? "animate-pulse" : ""}`}>
+                <span className={`absolute top-1 right-[calc(50%-14px)] flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-0.5 text-[10px] font-semibold text-white ${(pendingKitchen && href === "/cozinha") || (pendingWaiter && href === "/garcom") ? "animate-pulse" : ""}`}>
                   {badge}
                 </span>
               )}

@@ -120,6 +120,16 @@ export function SearchIcon({ className }: IconProps) {
   );
 }
 
+export function WaiterIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
+      <circle cx="10" cy="4" r="2.5" fill="currentColor" opacity="0.85" />
+      <path d="M5 19v-5.5L3.5 10C3 8.8 3.8 7.5 5 7.5h10c1.2 0 2 1.3 1.5 2.5L15 13.5V19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="7.5" y1="13.5" x2="12.5" y2="13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function LogoutIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
