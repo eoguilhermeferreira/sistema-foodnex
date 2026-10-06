@@ -43,7 +43,7 @@ export default function GarcomPublicPage() {
     loadCompany();
   }, [slug]);
 
-  // register service worker on mount
+  // register service worker and inject manifest on mount
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
@@ -51,6 +51,12 @@ export default function GarcomPublicPage() {
     if (typeof window !== "undefined" && "Notification" in window) {
       setNotifPermission(Notification.permission);
     }
+    // inject dynamic manifest so iOS uses the correct start_url with slug
+    const link = document.createElement("link");
+    link.rel = "manifest";
+    link.href = `/api/garcom-manifest/${window.location.pathname.split("/")[2]}`;
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
   }, []);
 
   // auto-subscribe if already granted (e.g. returning user)
