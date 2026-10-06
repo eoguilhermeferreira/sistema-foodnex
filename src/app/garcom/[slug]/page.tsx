@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatTime } from "@/lib/format";
 
@@ -26,6 +26,8 @@ export default function GarcomPublicPage() {
   const [company, setCompany] = useState<Company | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [calls, setCalls] = useState<WaiterCall[]>([]);
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | null>(null);
+  const prevPendingIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     async function loadCompany() {
@@ -41,6 +43,17 @@ export default function GarcomPublicPage() {
     loadCompany();
   }, [slug]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotifPermission(Notification.permission);
+    }
+  }, []);
+
+  function requestNotifPermission() {
+    if (!("Notification" in window)) return;
+    Notification.requestPermission().then((p) => setNotifPermission(p));
+  }
+
   const fetchCalls = useCallback(async () => {
     if (!company) return;
     const supabase = createClient();
@@ -50,7 +63,23 @@ export default function GarcomPublicPage() {
       .eq("company_id", company.id)
       .in("status", ["pendente", "atendendo"])
       .order("created_at", { ascending: true });
-    setCalls((data as WaiterCall[]) ?? []);
+    const rows = (data as WaiterCall[]) ?? [];
+
+    // detect new pendente calls and show browser notification
+    const newPending = rows.filter(
+      (c) => c.status === "pendente" && !prevPendingIds.current.has(c.id)
+    );
+    newPending.forEach((c) => {
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        new Notification("🛎️ Chamada de garçom", {
+          body: `Mesa ${c.table_number} — ${c.customer_name}`,
+          tag: c.id,
+        });
+      }
+    });
+    prevPendingIds.current = new Set(rows.filter((c) => c.status === "pendente").map((c) => c.id));
+
+    setCalls(rows);
   }, [company]);
 
   useEffect(() => {
@@ -122,6 +151,16 @@ export default function GarcomPublicPage() {
           <p className="text-xs text-muted">Painel do Garçom</p>
         </div>
       </div>
+
+      {/* notification permission prompt */}
+      {notifPermission !== "granted" && (
+        <button
+          onClick={requestNotifPermission}
+          className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-2 text-sm font-medium text-yellow-400 active:scale-95"
+        >
+          🔔 Ativar notificações do celular
+        </button>
+      )}
 
       {/* counters */}
       <div className="mb-4 grid grid-cols-2 gap-3">

@@ -55,6 +55,7 @@ interface Props {
 export function AdminShell({ companyId, companyName, children }: Props) {
   const [pendingOrders, setPendingOrders] = useState(0);
   const [pendingWaiter, setPendingWaiter] = useState(0);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const initializedRef = useRef(false);
 
   const fetchCounts = useCallback(async () => {
@@ -69,15 +70,18 @@ export function AdminShell({ companyId, companyName, children }: Props) {
         .from("waiter_calls")
         .select("*", { count: "exact", head: true })
         .eq("company_id", companyId)
-        .in("status", ["pendente", "atendendo"]),
+        .eq("status", "pendente"),
     ]);
     setPendingOrders(ordersRes.count ?? 0);
     setPendingWaiter(waiterRes.count ?? 0);
   }, [companyId]);
 
   useEffect(() => {
-    // desbloqueia AudioContext no primeiro toque (necessário para iOS/Android)
-    const unlock = () => { getAudioContext()?.resume(); };
+    const ctx = getAudioContext();
+    if (ctx && ctx.state !== "suspended") setAudioUnlocked(true);
+    const unlock = () => {
+      getAudioContext()?.resume().then(() => setAudioUnlocked(true));
+    };
     window.addEventListener("touchstart", unlock, { once: true });
     window.addEventListener("click", unlock, { once: true });
     return () => {
@@ -144,6 +148,19 @@ export function AdminShell({ companyId, companyName, children }: Props) {
         pendingWaiter={pendingWaiter > 0}
       />
       <main className="flex-1 overflow-y-auto p-4 pb-20 pt-[calc(1rem+53px)] md:p-8 md:pb-8 md:pt-8">
+        {!audioUnlocked && (
+          <button
+            onClick={() => {
+              getAudioContext()?.resume().then(() => {
+                setAudioUnlocked(true);
+                playNotificationSound();
+              });
+            }}
+            className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-2 text-sm font-medium text-yellow-400 hover:bg-yellow-500/20"
+          >
+            🔔 Ativar som de notificações
+          </button>
+        )}
         {children}
       </main>
     </div>
