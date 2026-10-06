@@ -29,7 +29,8 @@ export default function MesaCardapioPage() {
 
 function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof useStorefront>; numero: string }) {
   const { company, categories, products, flavors, addons, flavorSizePrices, addonSizePrices, prepTimes } = storefront;
-  const { items, total, clear } = useCart();
+  const { items, total, removeItem, clear } = useCart();
+  const [showCart, setShowCart] = useState(false);
 
   const [tableId, setTableId] = useState<string | null>(null);
   const [tableNotFound, setTableNotFound] = useState(false);
@@ -342,10 +343,45 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
         />
       </div>
 
+      {/* floating cart FAB */}
+      {items.length > 0 && company.is_open && (
+        <button
+          onClick={() => setShowCart(true)}
+          className="fixed bottom-6 right-4 z-40 flex items-center gap-2 rounded-2xl bg-wine pl-3 pr-4 py-3 text-white shadow-2xl active:scale-95 transition-transform"
+          style={{ bottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}
+        >
+          <span className="relative flex h-8 w-8 items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-wine">
+              {items.reduce((s, i) => s + i.quantity, 0)}
+            </span>
+          </span>
+          <div className="text-left">
+            <p className="text-xs font-bold leading-none">{formatCurrency(total)}</p>
+            <p className="text-[10px] opacity-80 leading-none mt-0.5">Ver sacola</p>
+          </div>
+        </button>
+      )}
+
       {sent && (
-        <div className="fixed bottom-20 left-1/2 z-40 -translate-x-1/2 rounded-lg bg-green-600 px-4 py-2 text-sm text-white shadow-lg">
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-green-600 px-4 py-2 text-sm text-white shadow-lg">
           Pedido enviado para a cozinha!
         </div>
+      )}
+
+      {showCart && (
+        <CartModal
+          items={items}
+          total={total}
+          sending={sending}
+          onRemove={removeItem}
+          onSend={async () => { await sendOrder(); setShowCart(false); }}
+          onClose={() => setShowCart(false)}
+        />
       )}
 
       {waiterStatus === "atendendo" && (
@@ -374,19 +410,77 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
         </div>
       )}
 
-      <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 space-y-2">
-        {items.length > 0 && company.is_open && (
-          <div className="rounded-xl bg-card p-3 shadow-lg">
-            <p className="text-sm text-muted">{items.length} item(ns) — {formatCurrency(total)}</p>
-            <button
-              onClick={sendOrder}
-              disabled={sending}
-              className="mt-2 w-full rounded-lg bg-wine px-4 py-2 text-sm font-medium text-white hover:bg-wine-hover disabled:opacity-50"
-            >
-              {sending ? "Enviando..." : "Enviar pedido para a cozinha"}
-            </button>
-          </div>
-        )}
+    </div>
+  );
+}
+
+interface CartModalProps {
+  items: import("@/contexts/CartContext").CartItem[];
+  total: number;
+  sending: boolean;
+  onRemove: (id: string) => void;
+  onSend: () => void;
+  onClose: () => void;
+}
+
+function CartModal({ items, total, sending, onRemove, onSend, onClose }: CartModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60" />
+      <div
+        className="relative w-full max-w-lg rounded-t-2xl bg-card p-4 pb-8 shadow-2xl"
+        style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-foreground">Sua sacola</h2>
+          <button onClick={onClose} className="rounded-full p-1 text-muted hover:bg-card-hover">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="max-h-72 overflow-y-auto space-y-3">
+          {items.map((item) => (
+            <div key={item.id} className="flex items-start gap-3">
+              <span className="shrink-0 rounded-md bg-wine/10 px-2 py-1 text-xs font-bold text-wine">{item.quantity}×</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground leading-tight">{item.product_name}</p>
+                {item.size_name && <p className="text-xs text-muted">{item.size_name}</p>}
+                {item.flavors && item.flavors.length > 0 && (
+                  <p className="text-xs text-muted">{item.flavors.map((f) => f.flavor_name).join(", ")}</p>
+                )}
+                {item.additions && item.additions.length > 0 && (
+                  <p className="text-xs text-muted">+ {item.additions.map((a) => a.addon_name).join(", ")}</p>
+                )}
+                {item.notes && <p className="text-xs italic text-muted">{item.notes}</p>}
+              </div>
+              <div className="shrink-0 flex flex-col items-end gap-1">
+                <span className="text-sm font-semibold text-foreground">{formatCurrency(item.price * item.quantity)}</span>
+                <button
+                  onClick={() => onRemove(item.id)}
+                  className="text-xs text-red-400 hover:text-red-300"
+                >
+                  Remover
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 border-t border-border pt-3 flex items-center justify-between">
+          <span className="text-sm font-semibold text-foreground">Total</span>
+          <span className="text-base font-bold text-foreground">{formatCurrency(total)}</span>
+        </div>
+
+        <button
+          onClick={onSend}
+          disabled={sending || items.length === 0}
+          className="mt-4 w-full rounded-xl bg-wine py-3 text-sm font-semibold text-white hover:bg-wine-hover disabled:opacity-50"
+        >
+          {sending ? "Enviando..." : "Enviar pedido para a cozinha"}
+        </button>
       </div>
     </div>
   );

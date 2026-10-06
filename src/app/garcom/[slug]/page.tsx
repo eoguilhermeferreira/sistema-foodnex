@@ -1,0 +1,179 @@
+"use client";
+
+import { useParams } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { formatTime } from "@/lib/format";
+
+interface WaiterCall {
+  id: string;
+  table_number: number;
+  customer_name: string;
+  status: "pendente" | "atendendo" | "concluido";
+  created_at: string;
+}
+
+interface Company {
+  id: string;
+  name: string;
+  fantasy_name: string | null;
+  logo_url: string | null;
+  logo_shape: string | null;
+}
+
+export default function GarcomPublicPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const [company, setCompany] = useState<Company | null>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [calls, setCalls] = useState<WaiterCall[]>([]);
+
+  useEffect(() => {
+    async function loadCompany() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("companies")
+        .select("id, name, fantasy_name, logo_url, logo_shape")
+        .eq("slug", slug)
+        .single();
+      if (!data) { setNotFound(true); return; }
+      setCompany(data as unknown as Company);
+    }
+    loadCompany();
+  }, [slug]);
+
+  const fetchCalls = useCallback(async () => {
+    if (!company) return;
+    const supabase = createClient();
+    const { data } = await (supabase as any)
+      .from("waiter_calls")
+      .select("*")
+      .eq("company_id", company.id)
+      .in("status", ["pendente", "atendendo"])
+      .order("created_at", { ascending: true });
+    setCalls((data as WaiterCall[]) ?? []);
+  }, [company]);
+
+  useEffect(() => {
+    if (!company) return;
+    fetchCalls();
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`garcom-public-${company.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "waiter_calls", filter: `company_id=eq.${company.id}` },
+        () => fetchCalls()
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [company, fetchCalls]);
+
+  async function attend(id: string) {
+    const supabase = createClient();
+    await (supabase as any).from("waiter_calls").update({ status: "atendendo" }).eq("id", id);
+    fetchCalls();
+  }
+
+  async function conclude(id: string) {
+    const supabase = createClient();
+    await (supabase as any).from("waiter_calls").update({ status: "concluido" }).eq("id", id);
+    fetchCalls();
+  }
+
+  if (notFound) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted">Estabelecimento não encontrado.</p>
+      </div>
+    );
+  }
+
+  if (!company) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted">Carregando...</p>
+      </div>
+    );
+  }
+
+  const pendentes = calls.filter((c) => c.status === "pendente");
+  const atendendo = calls.filter((c) => c.status === "atendendo");
+
+  return (
+    <div className="min-h-screen bg-background px-4 py-6">
+      {/* header */}
+      <div className="mb-6 flex items-center gap-3">
+        {company.logo_url ? (
+          <img
+            src={company.logo_url}
+            alt={company.name}
+            className={`h-12 w-12 shrink-0 object-cover ${company.logo_shape === "round" ? "rounded-full" : "rounded-xl"}`}
+          />
+        ) : (
+          <div className={`h-12 w-12 shrink-0 bg-card ${company.logo_shape === "round" ? "rounded-full" : "rounded-xl"}`} />
+        )}
+        <div>
+          <p className="font-bold text-foreground">{company.fantasy_name ?? company.name}</p>
+          <p className="text-xs text-muted">Painel do Garçom</p>
+        </div>
+      </div>
+
+      {/* counters */}
+      <div className="mb-4 grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-center">
+          <p className="text-xs text-red-400">Aguardando</p>
+          <p className="mt-0.5 text-2xl font-bold text-red-400">{pendentes.length}</p>
+        </div>
+        <div className="rounded-xl border border-yellow-500/40 bg-yellow-500/10 p-3 text-center">
+          <p className="text-xs text-yellow-400">Em atendimento</p>
+          <p className="mt-0.5 text-2xl font-bold text-yellow-400">{atendendo.length}</p>
+        </div>
+      </div>
+
+      {calls.length === 0 && (
+        <div className="mt-12 flex flex-col items-center gap-2 text-center">
+          <span className="text-4xl">✅</span>
+          <p className="text-sm font-medium text-foreground">Nenhuma chamada pendente</p>
+          <p className="text-xs text-muted">A página atualiza automaticamente.</p>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {calls.map((call) => (
+          <div
+            key={call.id}
+            className={`rounded-xl border p-4 ${
+              call.status === "pendente"
+                ? "border-red-500/60 bg-red-500/10"
+                : "border-yellow-500/60 bg-yellow-500/10"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold text-foreground">Mesa {call.table_number}</p>
+                <p className="text-sm text-muted">{call.customer_name} · {formatTime(call.created_at)}</p>
+              </div>
+              {call.status === "pendente" ? (
+                <button
+                  onClick={() => attend(call.id)}
+                  className="shrink-0 rounded-lg bg-wine px-4 py-2 text-sm font-medium text-white hover:bg-wine-hover active:scale-95"
+                >
+                  Atender
+                </button>
+              ) : (
+                <button
+                  onClick={() => conclude(call.id)}
+                  className="shrink-0 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 active:scale-95"
+                >
+                  Concluído
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
