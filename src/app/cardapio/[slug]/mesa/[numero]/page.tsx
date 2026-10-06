@@ -449,10 +449,10 @@ function CartModal({ items, total, sending, onRemove, onSend, onClose }: CartMod
                 <p className="text-sm font-medium text-foreground leading-tight">{item.product_name}</p>
                 {item.size_name && <p className="text-xs text-muted">{item.size_name}</p>}
                 {item.flavors && item.flavors.length > 0 && (
-                  <p className="text-xs text-muted">{item.flavors.map((f) => f.flavor_name).join(", ")}</p>
+                  <p className="text-xs text-muted">{item.flavors.map((f) => f.name).join(", ")}</p>
                 )}
                 {item.additions && item.additions.length > 0 && (
-                  <p className="text-xs text-muted">+ {item.additions.map((a) => a.addon_name).join(", ")}</p>
+                  <p className="text-xs text-muted">+ {item.additions.map((a) => a.name).join(", ")}</p>
                 )}
                 {item.notes && <p className="text-xs italic text-muted">{item.notes}</p>}
               </div>
