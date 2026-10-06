@@ -110,7 +110,7 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
     if (!company || !tableId || !customer || callingWaiter) return;
     setCallingWaiter(true);
     const supabase = createClient();
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("waiter_calls")
       .insert({
         company_id: company.id,

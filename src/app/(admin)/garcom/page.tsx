@@ -19,7 +19,7 @@ export default function GarcomPage() {
 
   const fetchCalls = useCallback(async () => {
     const supabase = createClient();
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("waiter_calls")
       .select("*")
       .eq("company_id", company.id)
@@ -46,13 +46,13 @@ export default function GarcomPage() {
 
   async function attend(id: string) {
     const supabase = createClient();
-    await supabase.from("waiter_calls").update({ status: "atendendo" }).eq("id", id);
+    await (supabase as any).from("waiter_calls").update({ status: "atendendo" }).eq("id", id);
     fetchCalls();
   }
 
   async function conclude(id: string) {
     const supabase = createClient();
-    await supabase.from("waiter_calls").update({ status: "concluido" }).eq("id", id);
+    await (supabase as any).from("waiter_calls").update({ status: "concluido" }).eq("id", id);
     fetchCalls();
   }
 

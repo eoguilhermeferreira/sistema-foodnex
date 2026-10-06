@@ -49,7 +49,7 @@ export function AdminShell({ companyId, companyName, children }: Props) {
         .select("*", { count: "exact", head: true })
         .eq("company_id", companyId)
         .eq("status", "aguardando_aceite"),
-      supabase
+      (supabase as any)
         .from("waiter_calls")
         .select("*", { count: "exact", head: true })
         .eq("company_id", companyId)
