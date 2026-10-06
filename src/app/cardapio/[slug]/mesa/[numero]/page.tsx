@@ -125,6 +125,12 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
     if (data) {
       setWaiterCallId((data as { id: string }).id);
       setWaiterStatus("pendente");
+      // dispara push para celulares dos garçons
+      fetch("/api/push/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ record: data }),
+      }).catch(() => {});
     }
     setCallingWaiter(false);
   }
