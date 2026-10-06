@@ -43,15 +43,48 @@ export default function GarcomPublicPage() {
     loadCompany();
   }, [slug]);
 
+  // register service worker on mount
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
     if (typeof window !== "undefined" && "Notification" in window) {
       setNotifPermission(Notification.permission);
     }
   }, []);
 
-  function requestNotifPermission() {
+  // auto-subscribe if already granted (e.g. returning user)
+  useEffect(() => {
+    if (notifPermission === "granted" && company) {
+      subscribePush(company.id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifPermission, company]);
+
+  async function subscribePush(companyId: string) {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      const sub = existing ?? await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+        ),
+      });
+      await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_id: companyId, subscription: sub.toJSON() }),
+      });
+    } catch {}
+  }
+
+  async function requestNotifPermission() {
     if (!("Notification" in window)) return;
-    Notification.requestPermission().then((p) => setNotifPermission(p));
+    const p = await Notification.requestPermission();
+    setNotifPermission(p);
+    if (p === "granted" && company) await subscribePush(company.id);
   }
 
   const fetchCalls = useCallback(async () => {
@@ -218,4 +251,13 @@ export default function GarcomPublicPage() {
       </div>
     </div>
   );
+}
+
+function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = window.atob(base64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr.buffer as ArrayBuffer;
 }

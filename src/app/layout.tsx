@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FoodNex",
   description: "Gestão Inteligente de Pedidos",
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
