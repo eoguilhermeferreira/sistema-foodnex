@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/types/database";
 import type { BusinessHours, CompanySettings, TableRestaurant } from "@/types/domain";
 
-type Tab = "empresa" | "mesas" | "impressoras" | "pagamento" | "notificacoes";
+type Tab = "empresa" | "mesas" | "impressoras";
 
 type CompanyRow = Database["public"]["Tables"]["companies"]["Row"];
 
@@ -25,8 +25,6 @@ export default function ConfiguracoesPage() {
           ["empresa", "Empresa"],
           ["mesas", "Mesas"],
           ["impressoras", "Impressoras"],
-          ["pagamento", "Pagamento"],
-          ["notificacoes", "Notificações"],
         ] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
@@ -42,8 +40,6 @@ export default function ConfiguracoesPage() {
         {tab === "empresa" && <EmpresaTab companyId={company.id} />}
         {tab === "mesas" && <MesasTab companyId={company.id} slug={company.slug} companyName={company.name} />}
         {tab === "impressoras" && <ImpressorasTab companyId={company.id} />}
-        {tab === "pagamento" && <PagamentoTab companyId={company.id} />}
-        {tab === "notificacoes" && <NotificacoesTab companyId={company.id} />}
       </div>
     </div>
   );
