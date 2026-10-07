@@ -101,6 +101,12 @@ export default function RelatoriosPage() {
     const totalPedidos = caixaOrders.length;
     const ticketMed = totalPedidos > 0 ? totalFat / totalPedidos : 0;
 
+    const payLabels: Record<string, string> = {
+      dinheiro: "Dinheiro", pix: "Pix",
+      cartao_credito: "Cartão de Crédito", cartao_debito: "Cartão de Débito",
+    };
+    const typeLabelsLocal: Record<string, string> = { entrega: "Entrega", retirada: "Retirada", mesa: "Mesa" };
+
     const byPaymentCaixa = caixaOrders.reduce<Record<string, { count: number; total: number }>>((acc, o) => {
       const m = o.payment_method ?? "Não informado";
       if (!acc[m]) acc[m] = { count: 0, total: 0 };
@@ -114,11 +120,21 @@ export default function RelatoriosPage() {
       return acc;
     }, {});
 
-    const payLabels: Record<string, string> = {
-      dinheiro: "Dinheiro", pix: "Pix",
-      cartao_credito: "Cartão de Crédito", cartao_debito: "Cartão de Débito",
-    };
-    const typeLabelsLocal: Record<string, string> = { entrega: "Entrega", retirada: "Retirada", mesa: "Mesa" };
+    // top products by quantity sold
+    const productMap: Record<string, { qty: number; total: number }> = {};
+    caixaOrders.forEach((o) => {
+      (o.order_items ?? []).forEach((item: any) => {
+        const key = item.product_name ?? "—";
+        if (!productMap[key]) productMap[key] = { qty: 0, total: 0 };
+        productMap[key].qty += item.quantity ?? 1;
+        productMap[key].total += (item.price ?? 0) * (item.quantity ?? 1);
+      });
+    });
+    const productRows = Object.entries(productMap)
+      .sort((a, b) => b[1].qty - a[1].qty)
+      .map(([name, { qty, total }]) =>
+        `<tr><td>${name}</td><td>${qty}</td><td>${formatCurrency(total)}</td></tr>`
+      ).join("") || `<tr><td colspan="3">—</td></tr>`;
 
     const payRows = Object.entries(byPaymentCaixa)
       .map(([m, { count, total }]) =>
@@ -133,94 +149,166 @@ export default function RelatoriosPage() {
     const sessaoInfo = caixaSessions && caixaSessions.length > 0
       ? `<tr><td>Abertura</td><td colspan="2">${new Date(caixaSessions[0].opened_at).toLocaleString("pt-BR")}</td></tr>
          <tr><td>Fechamento</td><td colspan="2">${caixaSessions[caixaSessions.length - 1].closed_at ? new Date(caixaSessions[caixaSessions.length - 1].closed_at!).toLocaleString("pt-BR") : "Em aberto"}</td></tr>`
-      : `<tr><td colspan="3">Sem sessão de caixa</td></tr>`;
+      : `<tr><td colspan="3">Sem sessão de caixa registrada</td></tr>`;
+
+    // detailed orders list
+    const ordersDetailRows = caixaOrders.map((o) => {
+      const timeStr = new Date(o.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      const payLabel = payLabels[o.payment_method ?? ""] ?? (o.payment_method ?? "—");
+      const typeLabel = typeLabelsLocal[o.type] ?? o.type;
+      const items = (o.order_items ?? []) as any[];
+      const itemsHtml = items.length > 0
+        ? items.map((item: any) => {
+            const extras: string[] = [];
+            if (item.size_name) extras.push(item.size_name);
+            if (item.flavors && Array.isArray(item.flavors) && item.flavors.length > 0)
+              extras.push(item.flavors.map((f: any) => f.name ?? f).join(", "));
+            if (item.additions && Array.isArray(item.additions) && item.additions.length > 0)
+              extras.push("+" + item.additions.map((a: any) => a.name ?? a).join(", "));
+            const extraStr = extras.length > 0 ? `<span style="color:#888;font-size:10px;"> (${extras.join(" · ")})</span>` : "";
+            return `<div style="display:flex;justify-content:space-between;padding:2px 0;">
+              <span>${item.quantity ?? 1}x ${item.product_name ?? "—"}${extraStr}</span>
+              <span style="font-weight:600;">${formatCurrency((item.price ?? 0) * (item.quantity ?? 1))}</span>
+            </div>`;
+          }).join("")
+        : `<div style="color:#aaa;font-size:11px;">Sem itens registrados</div>`;
+
+      return `<div style="border:1px solid #e5e5e5;border-radius:6px;padding:10px 12px;margin-bottom:8px;page-break-inside:avoid;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div>
+            <span style="font-weight:700;font-size:13px;color:#7f1d1d;">#${o.order_code}</span>
+            <span style="margin-left:8px;font-weight:600;color:#111;">${o.customer_name}</span>
+            <span style="margin-left:6px;font-size:11px;color:#888;">${typeLabel}${o.type === "mesa" ? ` · Mesa ${(o as any).table_number ?? ""}` : ""}</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px;color:#888;">${timeStr}</span>
+            <span style="margin-left:8px;font-size:11px;color:#555;background:#f0f0f0;padding:2px 6px;border-radius:4px;">${payLabel}</span>
+          </div>
+        </div>
+        <div style="border-top:1px dashed #e5e5e5;padding-top:6px;font-size:12px;">
+          ${itemsHtml}
+        </div>
+        <div style="border-top:1px solid #e5e5e5;margin-top:6px;padding-top:6px;display:flex;justify-content:flex-end;">
+          <span style="font-size:13px;font-weight:800;color:#111;">Total: ${formatCurrency(o.total)}</span>
+        </div>
+      </div>`;
+    }).join("");
 
     const logoHtml = companyDetails.logo_url
-      ? `<img src="${companyDetails.logo_url}" alt="logo" style="width:72px;height:72px;object-fit:cover;border-radius:12px;margin-bottom:8px;" />`
-      : "";
+      ? `<img src="${companyDetails.logo_url}" alt="logo" style="width:64px;height:64px;object-fit:cover;border-radius:10px;" />`
+      : `<div style="width:64px;height:64px;background:#7f1d1d;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:900;">${displayName.charAt(0).toUpperCase()}</div>`;
 
-    const win = window.open("", "_blank", "width=800,height=1000");
+    const win = window.open("", "_blank", "width=860,height=1100");
     if (!win) return;
     win.document.write(`<!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><title>Fechamento de Caixa — ${fmtDate(caixaDate)}</title>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Fechamento de Caixa — ${displayName} — ${fmtDate(caixaDate)}</title>
 <style>
-  @page { size: A4 portrait; margin: 20mm 18mm; }
+  @page { size: A4 portrait; margin: 16mm 14mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; }
-  .header { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid #7f1d1d; padding-bottom: 16px; margin-bottom: 20px; }
-  .header-text h1 { font-size: 20px; font-weight: 800; color: #7f1d1d; }
-  .header-text p { font-size: 12px; color: #555; margin-top: 2px; }
-  .doc-title { font-size: 13px; font-weight: 700; color: #111; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .section { margin-bottom: 20px; }
-  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #7f1d1d; border-bottom: 1px solid #e5e5e5; padding-bottom: 4px; margin-bottom: 10px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th { background: #f7f7f7; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; padding: 7px 10px; border: 1px solid #e5e5e5; }
-  td { padding: 7px 10px; border: 1px solid #e5e5e5; color: #222; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; color: #1a1a1a; background: #fff; }
+  /* header */
+  .page-header { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 3px solid #7f1d1d; margin-bottom: 18px; }
+  .page-header h1 { font-size: 19px; font-weight: 900; color: #7f1d1d; line-height: 1.1; }
+  .page-header .subtitle { font-size: 11px; color: #666; margin-top: 3px; }
+  .page-header .doc-label { font-size: 12px; font-weight: 700; color: #333; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+  /* summary cards */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+  .card { border: 1px solid #e5e5e5; border-radius: 7px; padding: 10px 12px; }
+  .card .lbl { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 3px; }
+  .card .val { font-size: 17px; font-weight: 900; color: #111; }
+  .card.hi .val { color: #7f1d1d; }
+  /* section */
+  .sec { margin-bottom: 16px; }
+  .sec-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #7f1d1d; border-bottom: 1.5px solid #e5e5e5; padding-bottom: 3px; margin-bottom: 9px; }
+  /* tables */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #f5f5f5; font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: #666; padding: 6px 9px; border: 1px solid #e8e8e8; }
+  td { padding: 6px 9px; border: 1px solid #e8e8e8; color: #222; vertical-align: top; }
   tr:nth-child(even) td { background: #fafafa; }
   td:last-child, th:last-child { text-align: right; font-weight: 600; }
   td:nth-child(2), th:nth-child(2) { text-align: center; }
-  .totals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .total-box { border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px 14px; }
-  .total-box .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 4px; }
-  .total-box .value { font-size: 18px; font-weight: 800; color: #111; }
-  .total-box.highlight .value { color: #7f1d1d; }
-  .footer { margin-top: 32px; border-top: 1px solid #e5e5e5; padding-top: 10px; display: flex; justify-content: space-between; font-size: 10px; color: #888; }
-  @media print { .no-print { display: none; } }
+  /* two-col layout for summary tables */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  /* footer */
+  .page-footer { margin-top: 20px; border-top: 1px solid #e5e5e5; padding-top: 8px; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; }
+  @media print { .no-print { display: none !important; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style></head><body>
-<div class="header">
+
+<div class="page-header">
   ${logoHtml}
-  <div class="header-text">
+  <div>
     <h1>${displayName}</h1>
-    <p class="doc-title">Fechamento de Caixa</p>
-    <p>${fmtDate(caixaDate)} · Gerado em ${new Date().toLocaleString("pt-BR")}</p>
+    <div class="doc-label">Fechamento de Caixa</div>
+    <div class="subtitle">${fmtDate(caixaDate)} &nbsp;·&nbsp; Gerado em ${new Date().toLocaleString("pt-BR")}</div>
   </div>
 </div>
 
-<div class="totals-grid">
-  <div class="total-box highlight">
-    <div class="label">Faturamento Total</div>
-    <div class="value">${formatCurrency(totalFat)}</div>
+<div class="cards">
+  <div class="card hi">
+    <div class="lbl">Faturamento</div>
+    <div class="val">${formatCurrency(totalFat)}</div>
   </div>
-  <div class="total-box">
-    <div class="label">Total de Pedidos</div>
-    <div class="value">${totalPedidos}</div>
+  <div class="card">
+    <div class="lbl">Pedidos</div>
+    <div class="val">${totalPedidos}</div>
   </div>
-  <div class="total-box">
-    <div class="label">Ticket Médio</div>
-    <div class="value">${formatCurrency(ticketMed)}</div>
+  <div class="card">
+    <div class="lbl">Ticket Médio</div>
+    <div class="val">${formatCurrency(ticketMed)}</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Itens Vendidos</div>
+    <div class="val">${Object.values(productMap).reduce((s, p) => s + p.qty, 0)}</div>
   </div>
 </div>
 
-<div class="section">
-  <div class="section-title">Sessão de Caixa</div>
+<div class="sec">
+  <div class="sec-title">Sessão de Caixa</div>
   <table><tbody>${sessaoInfo}</tbody></table>
 </div>
 
-<div class="section">
-  <div class="section-title">Formas de Pagamento</div>
+<div class="two-col">
+  <div class="sec">
+    <div class="sec-title">Formas de Pagamento</div>
+    <table>
+      <thead><tr><th>Forma</th><th>Qtd</th><th>Total</th></tr></thead>
+      <tbody>${payRows}</tbody>
+    </table>
+  </div>
+  <div class="sec">
+    <div class="sec-title">Por Tipo de Pedido</div>
+    <table>
+      <thead><tr><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead>
+      <tbody>${typeRows}</tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">Produtos Vendidos</div>
   <table>
-    <thead><tr><th>Forma</th><th>Qtd</th><th>Total</th></tr></thead>
-    <tbody>${payRows}</tbody>
+    <thead><tr><th>Produto</th><th>Qtd</th><th>Total</th></tr></thead>
+    <tbody>${productRows}</tbody>
   </table>
 </div>
 
-<div class="section">
-  <div class="section-title">Tipo de Pedido</div>
-  <table>
-    <thead><tr><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead>
-    <tbody>${typeRows}</tbody>
-  </table>
+<div class="sec">
+  <div class="sec-title">Detalhamento dos Pedidos</div>
+  ${ordersDetailRows || `<p style="color:#aaa;font-size:12px;">Nenhum pedido no período.</p>`}
 </div>
 
-<div class="footer">
-  <span>FoodNex — Sistema de Gestão</span>
-  <span>${displayName} · ${fmtDate(caixaDate)}</span>
+<div class="page-footer">
+  <span>FoodNex — Sistema de Gestão de Pedidos</span>
+  <span>${displayName} &nbsp;·&nbsp; ${fmtDate(caixaDate)}</span>
 </div>
 
-<div class="no-print" style="text-align:center;margin-top:24px;">
-  <button onclick="window.print()" style="background:#7f1d1d;color:#fff;border:none;padding:10px 28px;font-size:14px;border-radius:8px;cursor:pointer;">🖨️ Imprimir / Salvar PDF</button>
+<div class="no-print" style="text-align:center;margin-top:24px;padding-bottom:24px;">
+  <button onclick="window.print()" style="background:#7f1d1d;color:#fff;border:none;padding:11px 32px;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;letter-spacing:0.3px;">
+    🖨️ Imprimir / Salvar PDF
+  </button>
 </div>
-<script>window.onload=function(){window.print();}</script>
+<script>window.onload = function() { window.print(); }</script>
 </body></html>`);
     win.document.close();
     win.focus();
