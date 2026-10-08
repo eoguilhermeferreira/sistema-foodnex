@@ -331,6 +331,9 @@ export type Database = {
           slug: string
           state: string | null
           tables_count: number | null
+          trial_ends_at: string | null
+          plan: string | null
+          plan_expires_at: string | null
           website: string | null
           whatsapp: string | null
           zip_code: string | null
@@ -365,6 +368,9 @@ export type Database = {
           slug: string
           state?: string | null
           tables_count?: number | null
+          trial_ends_at?: string | null
+          plan?: string | null
+          plan_expires_at?: string | null
           website?: string | null
           whatsapp?: string | null
           zip_code?: string | null
@@ -399,6 +405,9 @@ export type Database = {
           slug?: string
           state?: string | null
           tables_count?: number | null
+          trial_ends_at?: string | null
+          plan?: string | null
+          plan_expires_at?: string | null
           website?: string | null
           whatsapp?: string | null
           zip_code?: string | null
