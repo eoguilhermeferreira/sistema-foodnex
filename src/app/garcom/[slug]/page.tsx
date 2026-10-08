@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { BellIcon } from "@/components/icons";
 import { formatTime } from "@/lib/format";
 
 interface WaiterCall {
@@ -198,7 +199,7 @@ export default function GarcomPublicPage() {
           onClick={requestNotifPermission}
           className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-2 text-sm font-medium text-yellow-400 active:scale-95"
         >
-          🔔 Ativar notificações do celular
+          <BellIcon className="h-4 w-4" /> Ativar notificações do celular
         </button>
       )}
 

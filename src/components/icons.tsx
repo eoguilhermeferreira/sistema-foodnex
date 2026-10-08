@@ -4,75 +4,87 @@ interface IconProps {
 
 export function DashboardIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <rect x="2" y="2" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.8" />
-      <rect x="11" y="2" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.8" />
-      <rect x="2" y="11" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.8" />
-      <rect x="11" y="11" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.8" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
     </svg>
   );
 }
 
+/* Chef hat — represents the kitchen */
 export function KitchenIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <path d="M10 2C7.8 2 6 3.8 6 6c0 1.5.7 2.8 1.8 3.6L7 17h6l-.8-7.4C13.3 8.8 14 7.5 14 6c0-2.2-1.8-4-4-4z" fill="currentColor" opacity="0.85" />
-      <rect x="4" y="17" width="12" height="1.5" rx="0.75" fill="currentColor" opacity="0.5" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M6 19h12v1a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-1z" />
+      <path d="M6 19v-5h12v5" />
+      <path d="M8 14v-3" />
+      <path d="M12 14V9" />
+      <path d="M16 14v-3" />
+      <path d="M16 9a4 4 0 0 0-8 0" />
+      <path d="M8 9a4 4 0 0 1 8 0" />
+      <path d="M8 9H6.5a2.5 2.5 0 0 0 0 5H8" />
+      <path d="M16 9h1.5a2.5 2.5 0 0 1 0 5H16" />
     </svg>
   );
 }
 
+/* Person walking with bag — pickup */
 export function PickupIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <circle cx="10" cy="4" r="2.5" fill="currentColor" opacity="0.85" />
-      <path d="M6 18v-6l-1.5-3.5C4 7.3 4.8 6 6 6h8c1.2 0 2 1.3 1.5 2.5L14 12v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="8" y1="12" x2="12" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="12" cy="4" r="2" />
+      <path d="M9 21v-6l-2-3 2-4h6l2 4-2 3v6" />
+      <path d="M9 21h6" />
+      <path d="M15 12l1.5 2" />
     </svg>
   );
 }
 
+/* Motorcycle — delivery */
 export function DeliveryIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <path d="M2 12h10l2-5h3l1 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="5.5" cy="14.5" r="1.5" fill="currentColor" />
-      <circle cx="14.5" cy="14.5" r="1.5" fill="currentColor" />
-      <path d="M2 8h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M2 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="5.5" cy="17" r="2.5" />
+      <circle cx="18.5" cy="17" r="2.5" />
+      <path d="M8 17h7" />
+      <path d="M14 17l-1.5-5H9l-1.5 3H5.5" />
+      <path d="M12.5 12l2-5h3.5l1.5 5" />
+      <path d="M10 7h3" />
     </svg>
   );
 }
 
+/* Table with chairs */
 export function TableIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <rect x="3" y="8" width="14" height="5" rx="1.5" fill="currentColor" opacity="0.85" />
-      <rect x="5" y="13" width="2" height="4" rx="1" fill="currentColor" opacity="0.65" />
-      <rect x="13" y="13" width="2" height="4" rx="1" fill="currentColor" opacity="0.65" />
-      <rect x="7" y="3" width="6" height="5" rx="1" fill="currentColor" opacity="0.4" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <rect x="3" y="9" width="18" height="3" rx="1" />
+      <path d="M6 12v6" />
+      <path d="M18 12v6" />
+      <path d="M4 6c0-1.1.9-2 2-2h12a2 2 0 0 1 2 2v3H4V6z" />
     </svg>
   );
 }
 
+/* Open book / menu */
 export function MenuIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <rect x="3" y="3" width="14" height="2" rx="1" fill="currentColor" opacity="0.85" />
-      <rect x="3" y="7" width="10" height="2" rx="1" fill="currentColor" opacity="0.65" />
-      <rect x="3" y="11" width="12" height="2" rx="1" fill="currentColor" opacity="0.65" />
-      <rect x="3" y="15" width="8" height="2" rx="1" fill="currentColor" opacity="0.5" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
     </svg>
   );
 }
 
 export function ReportsIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <rect x="3" y="12" width="3" height="5" rx="1" fill="currentColor" opacity="0.5" />
-      <rect x="8.5" y="8" width="3" height="9" rx="1" fill="currentColor" opacity="0.7" />
-      <rect x="14" y="4" width="3" height="13" rx="1" fill="currentColor" opacity="0.9" />
-      <path d="M3 3l4.5 4.5L11 4l6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M8 17v-4" />
+      <path d="M12 17v-8" />
+      <path d="M16 17v-6" />
     </svg>
   );
 }
@@ -86,56 +98,91 @@ export function WhatsAppIcon({ className }: IconProps) {
   );
 }
 
+/* Gear — settings */
 export function SettingsIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <circle cx="10" cy="10" r="2.5" fill="currentColor" opacity="0.9" />
-      <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   );
 }
 
 export function HamburgerIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={className} aria-hidden>
+      <path d="M3 6h18M3 12h18M3 18h18" />
     </svg>
   );
 }
 
 export function CloseIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={className} aria-hidden>
+      <path d="M18 6L6 18M6 6l12 12" />
     </svg>
   );
 }
 
 export function SearchIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <circle cx="8.5" cy="8.5" r="5" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
-      <path d="M13 13l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M21 21l-4.35-4.35" />
     </svg>
   );
 }
 
+/* Waiter with tray */
 export function WaiterIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <circle cx="10" cy="4" r="2.5" fill="currentColor" opacity="0.85" />
-      <path d="M5 19v-5.5L3.5 10C3 8.8 3.8 7.5 5 7.5h10c1.2 0 2 1.3 1.5 2.5L15 13.5V19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="7.5" y1="13.5" x2="12.5" y2="13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="12" cy="4" r="2" />
+      <path d="M12 6v6" />
+      <path d="M8 22v-5l-1-4h10l-1 4v5" />
+      <path d="M6 12a6 6 0 0 0 12 0" />
+      <path d="M6 12H4" />
+      <path d="M18 12h2" />
     </svg>
   );
 }
 
 export function LogoutIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <path d="M7 3H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M13 14l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M17 10H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
+
+/* Bell — notifications */
+export function BellIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+
+/* Clock */
+export function ClockIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" />
+    </svg>
+  );
+}
+
+/* Check circle */
+export function CheckCircleIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
   );
 }

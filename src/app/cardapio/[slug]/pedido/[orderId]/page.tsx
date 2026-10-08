@@ -5,27 +5,30 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types/domain";
+import { DeliveryIcon, KitchenIcon, CheckCircleIcon, PickupIcon, TableIcon, ClockIcon } from "@/components/icons";
 
-const deliverySteps: { key: OrderStatus; label: string; emoji: string; desc: string }[] = [
-  { key: "aguardando_aceite", label: "Pedido recebido", emoji: "📋", desc: "Aguardando o restaurante confirmar" },
-  { key: "em_preparo", label: "Em preparo", emoji: "👨‍🍳", desc: "Seu pedido está sendo preparado" },
-  { key: "pronto", label: "Saindo em breve", emoji: "📦", desc: "Embalando e preparando para entrega" },
-  { key: "saiu_entrega", label: "Saiu para entrega", emoji: "🛵", desc: "O entregador está a caminho" },
-  { key: "concluido", label: "Entregue!", emoji: "🎉", desc: "Bom apetite!" },
+type StepIcon = React.ComponentType<{ className?: string }>;
+
+const deliverySteps: { key: OrderStatus; label: string; Icon: StepIcon; desc: string }[] = [
+  { key: "aguardando_aceite", label: "Pedido recebido", Icon: ClockIcon, desc: "Aguardando o restaurante confirmar" },
+  { key: "em_preparo", label: "Em preparo", Icon: KitchenIcon, desc: "Seu pedido está sendo preparado" },
+  { key: "pronto", label: "Saindo em breve", Icon: CheckCircleIcon, desc: "Embalando e preparando para entrega" },
+  { key: "saiu_entrega", label: "Saiu para entrega", Icon: DeliveryIcon, desc: "O entregador está a caminho" },
+  { key: "concluido", label: "Entregue!", Icon: CheckCircleIcon, desc: "Bom apetite!" },
 ];
 
-const pickupSteps: { key: OrderStatus; label: string; emoji: string; desc: string }[] = [
-  { key: "aguardando_aceite", label: "Pedido recebido", emoji: "📋", desc: "Aguardando o restaurante confirmar" },
-  { key: "em_preparo", label: "Em preparo", emoji: "👨‍🍳", desc: "Seu pedido está sendo preparado" },
-  { key: "pronto", label: "Pronto para retirada", emoji: "✅", desc: "Pode vir buscar!" },
-  { key: "concluido", label: "Retirado!", emoji: "🎉", desc: "Bom apetite!" },
+const pickupSteps: { key: OrderStatus; label: string; Icon: StepIcon; desc: string }[] = [
+  { key: "aguardando_aceite", label: "Pedido recebido", Icon: ClockIcon, desc: "Aguardando o restaurante confirmar" },
+  { key: "em_preparo", label: "Em preparo", Icon: KitchenIcon, desc: "Seu pedido está sendo preparado" },
+  { key: "pronto", label: "Pronto para retirada", Icon: PickupIcon, desc: "Pode vir buscar!" },
+  { key: "concluido", label: "Retirado!", Icon: CheckCircleIcon, desc: "Bom apetite!" },
 ];
 
-const mesaSteps: { key: OrderStatus; label: string; emoji: string; desc: string }[] = [
-  { key: "aguardando_aceite", label: "Pedido recebido", emoji: "📋", desc: "Aguardando o restaurante confirmar" },
-  { key: "em_preparo", label: "Em preparo", emoji: "👨‍🍳", desc: "Seu pedido está sendo preparado" },
-  { key: "pronto", label: "Saindo da cozinha", emoji: "🍽️", desc: "Chegando à sua mesa!" },
-  { key: "concluido", label: "Entregue!", emoji: "🎉", desc: "Bom apetite!" },
+const mesaSteps: { key: OrderStatus; label: string; Icon: StepIcon; desc: string }[] = [
+  { key: "aguardando_aceite", label: "Pedido recebido", Icon: ClockIcon, desc: "Aguardando o restaurante confirmar" },
+  { key: "em_preparo", label: "Em preparo", Icon: KitchenIcon, desc: "Seu pedido está sendo preparado" },
+  { key: "pronto", label: "Saindo da cozinha", Icon: TableIcon, desc: "Chegando à sua mesa!" },
+  { key: "concluido", label: "Entregue!", Icon: CheckCircleIcon, desc: "Bom apetite!" },
 ];
 
 export default function PedidoTrackingPage() {
@@ -69,7 +72,9 @@ export default function PedidoTrackingPage() {
   if (order.status === "cancelado") {
     return (
       <div className="p-8 text-center">
-        <span className="text-5xl">😔</span>
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10">
+          <ClockIcon className="h-8 w-8 text-red-400" />
+        </div>
         <p className="mt-4 text-xl font-semibold text-foreground">Pedido cancelado</p>
         <p className="mt-1 text-sm text-muted">#{order.order_code}</p>
       </div>
@@ -90,12 +95,15 @@ export default function PedidoTrackingPage() {
       {/* top hero */}
       <div className="flex items-center gap-4 pb-8">
         <div
-          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-4xl shadow-lg transition-all duration-700 ${
+          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full shadow-lg transition-all duration-700 ${
             isDone ? "bg-green-500/20" : "bg-wine/10"
           }`}
           style={{ animation: isDone ? "none" : "pulse 2s ease-in-out infinite" }}
         >
-          {currentStep?.emoji ?? "📋"}
+          {currentStep
+            ? <currentStep.Icon className={`h-8 w-8 ${isDone ? "text-green-400" : "text-wine"}`} />
+            : <ClockIcon className="h-8 w-8 text-wine" />
+          }
         </div>
         <div>
           <p className="text-xs text-muted">Pedido #{order.order_code} · {order.customer_name}</p>
@@ -152,13 +160,12 @@ export default function PedidoTrackingPage() {
 
                 {/* right: label */}
                 <div className="pb-10">
-                  <p
-                    className={`text-sm font-semibold leading-8 transition-colors duration-300 ${
-                      done ? "text-wine" : active ? "text-foreground" : "text-muted"
-                    }`}
-                  >
-                    {step.emoji} {step.label}
-                  </p>
+                  <div className={`flex items-center gap-2 h-8 transition-colors duration-300`}>
+                    <step.Icon className={`h-4 w-4 shrink-0 ${done ? "text-wine" : active ? "text-foreground" : "text-muted"}`} />
+                    <p className={`text-sm font-semibold ${done ? "text-wine" : active ? "text-foreground" : "text-muted"}`}>
+                      {step.label}
+                    </p>
+                  </div>
                   {active && (
                     <p className="text-xs text-muted mt-0.5">{step.desc}</p>
                   )}
