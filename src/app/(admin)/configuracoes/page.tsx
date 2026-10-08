@@ -537,7 +537,7 @@ function MesasTab({ companyId, slug, companyName }: { companyId: string; slug: s
         <p class="mesa-label">Mesa</p>
         <p class="mesa-number">${tableNumber}</p>
         <img src="${qrUrl}" width="220" height="220" style="border-radius:8px;" />
-        <p class="scan-text">📱 Escaneie o QR Code<br>para ver o cardápio e fazer seu pedido</p>
+        <p class="scan-text">Escaneie o QR Code<br>para ver o cardápio e fazer seu pedido</p>
       </div>
       <button class="no-print" onclick="window.print()" style="margin-top:24px;padding:10px 24px;background:#8b1a1a;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Imprimir</button>
     </body></html>`);

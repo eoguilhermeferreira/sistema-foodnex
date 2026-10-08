@@ -8,6 +8,7 @@ import { MenuBrowser } from "@/components/storefront/MenuBrowser";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import type { TableCustomer } from "@/types/domain";
+import { TableIcon, BellIcon } from "@/components/icons";
 
 export default function MesaCardapioPage() {
   const { slug, numero } = useParams<{ slug: string; numero: string }>();
@@ -302,7 +303,7 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
 
         {prepTimes && prepTimes.table_minutes > 0 && (
           <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5">
-            <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">🍽️ Mesa {prepTimes.table_minutes} min</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap"><TableIcon className="h-3 w-3" /> Mesa {prepTimes.table_minutes} min</span>
           </div>
         )}
 
@@ -325,7 +326,7 @@ function MesaContent({ storefront, numero }: { storefront: ReturnType<typeof use
               disabled={callingWaiter}
               className="mt-2 w-full rounded-lg border border-wine/40 bg-wine/10 px-3 py-2 text-sm font-medium text-wine hover:bg-wine/20 disabled:opacity-50"
             >
-              {callingWaiter ? "Chamando..." : "🔔 Chamar Garçom"}
+              {callingWaiter ? "Chamando..." : <span className="flex items-center justify-center gap-1.5"><BellIcon className="h-4 w-4" /> Chamar Garçom</span>}
             </button>
           )}
           {waiterStatus === "pendente" && (

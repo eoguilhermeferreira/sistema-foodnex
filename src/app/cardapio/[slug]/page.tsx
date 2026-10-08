@@ -7,6 +7,7 @@ import { CartProvider, useCart } from "@/contexts/CartContext";
 import { MenuBrowser } from "@/components/storefront/MenuBrowser";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrency } from "@/lib/format";
+import { DeliveryIcon, PickupIcon, TableIcon } from "@/components/icons";
 
 export default function CardapioPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -189,17 +190,17 @@ function CardapioContent({ storefront }: { storefront: ReturnType<typeof useStor
           <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5">
             {prepTimes.delivery_minutes > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">
-                🛵 Entrega {prepTimes.delivery_minutes} min
+                <DeliveryIcon className="h-3 w-3" /> Entrega {prepTimes.delivery_minutes} min
               </span>
             )}
             {prepTimes.pickup_minutes > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">
-                🏃 Retirada {prepTimes.pickup_minutes} min
+                <PickupIcon className="h-3 w-3" /> Retirada {prepTimes.pickup_minutes} min
               </span>
             )}
             {prepTimes.table_minutes > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs text-muted whitespace-nowrap">
-                🍽️ Mesa {prepTimes.table_minutes} min
+                <TableIcon className="h-3 w-3" /> Mesa {prepTimes.table_minutes} min
               </span>
             )}
           </div>
@@ -488,7 +489,7 @@ function CheckoutModal({
             )}
             {deliveryFee > 0 && (
               <div className="flex justify-between rounded-xl bg-card px-4 py-2">
-                <span className="text-sm text-muted">🛵 Taxa de entrega</span>
+                <span className="text-sm text-muted flex items-center gap-1"><DeliveryIcon className="h-3.5 w-3.5" /> Taxa de entrega</span>
                 <span className="text-sm text-wine">+{formatCurrency(deliveryFee)}</span>
               </div>
             )}
@@ -506,7 +507,7 @@ function CheckoutModal({
                 type === "entrega" ? "bg-wine text-white" : "bg-card text-muted"
               }`}
             >
-              🛵 Entrega
+              <span className="flex items-center justify-center gap-1.5"><DeliveryIcon className="h-4 w-4" /> Entrega</span>
             </button>
             <button
               onClick={() => setType("retirada")}
@@ -514,7 +515,7 @@ function CheckoutModal({
                 type === "retirada" ? "bg-wine text-white" : "bg-card text-muted"
               }`}
             >
-              🏃 Retirada
+              <span className="flex items-center justify-center gap-1.5"><PickupIcon className="h-4 w-4" /> Retirada</span>
             </button>
           </div>
 

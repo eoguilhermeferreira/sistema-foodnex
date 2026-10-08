@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "./Sidebar";
+import { BellIcon } from "@/components/icons";
 
 // Singleton AudioContext — desbloqueado no primeiro toque do usuário
 let audioCtx: AudioContext | null = null;
@@ -158,7 +159,7 @@ export function AdminShell({ companyId, companyName, children }: Props) {
             }}
             className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-2 text-sm font-medium text-yellow-400 hover:bg-yellow-500/20"
           >
-            🔔 Ativar som de notificações
+            <BellIcon className="h-4 w-4" /> Ativar som de notificações
           </button>
         )}
         {children}
