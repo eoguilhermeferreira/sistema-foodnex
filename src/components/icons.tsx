@@ -45,13 +45,8 @@ export function PickupIcon({ className }: IconProps) {
 /* Motorcycle — delivery */
 export function DeliveryIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <circle cx="5.5" cy="17" r="2.5" />
-      <circle cx="18.5" cy="17" r="2.5" />
-      <path d="M8 17h7" />
-      <path d="M14 17l-1.5-5H9l-1.5 3H5.5" />
-      <path d="M12.5 12l2-5h3.5l1.5 5" />
-      <path d="M10 7h3" />
+    <svg viewBox="0 0 640 512" fill="currentColor" className={className} aria-hidden>
+      <path d="M280 32c-13.3 0-24 10.7-24 24s10.7 24 24 24h57.7l16.4 30.3L256 192l-45.3-45.3C187.1 123.1 155.3 112 122.5 112H64c-17.7 0-32 14.3-32 32s14.3 32 32 32h58.5c15.8 0 31 6.3 42.2 17.5L192 201.4V256H120.5C89.7 256 62.4 273.3 49.5 300.2L40 320H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H52.2C61 419.4 112 464 176 464c60.9 0 110.3-41.6 122.8-96H341c12.5 54.4 61.9 96 122.8 96 67.7 0 122.7-54.9 122.7-122.7c0-6.9-.6-13.7-1.7-20.3C617.4 385.4 640 354.5 640 320v-32c0-17.7-14.3-32-32-32H544L416 96H280zM176 400a48 48 0 1 1 0-96 48 48 0 1 1 0 96zm240-48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0z"/>
     </svg>
   );
 }
