@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -442,16 +443,16 @@ export default function LandingPage() {
           }}>
             7 dias grátis · sem cartão de crédito
           </div>
-          {/* Logo placeholder — substituir por <Image> quando logo chegar */}
-          <h1 style={{
-            fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800,
-            fontSize: "clamp(2.8rem,8vw,6rem)", lineHeight: 1, letterSpacing: "-.04em",
-            color: "var(--foreground)",
-          }}>
-            Food<span style={{ color: "var(--wine)" }}>Nex</span>
-          </h1>
+          <Image
+            src="/logo.jpg"
+            alt="FoodNex — Gestão Inteligente de Pedidos"
+            width={340}
+            height={340}
+            priority
+            style={{ marginInline: "auto", display: "block", objectFit: "contain" }}
+          />
           <p style={{
-            marginTop: 20, fontSize: "clamp(1rem,2vw,1.25rem)", color: "var(--muted)", lineHeight: 1.6,
+            marginTop: 8, fontSize: "clamp(1rem,2vw,1.2rem)", color: "var(--muted)", lineHeight: 1.6,
           }}>
             Do cardápio à cozinha. Do pedido à entrega.<br />
             Gestão inteligente para restaurantes modernos.
