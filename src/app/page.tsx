@@ -1,218 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-
-/* ─────────────── SCROLL-LOCKED HERO ─────────────── */
-function ScrollHero() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const taglineRef = useRef<HTMLDivElement>(null);
-  const hintRef = useRef<HTMLDivElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const SCRUB = 3200;
-    let dur = 0, target = 0, current = 0, started = false;
-    let seeking = false, pending: number | null = null;
-    let locked = false, lockedY = 0, touchY = 0;
-    let rafId: number;
-
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-    function clamp(v: number, a: number, b: number) { return Math.min(b, Math.max(a, v)); }
-
-    function lock() {
-      if (locked) return;
-      locked = true; lockedY = window.scrollY;
-      const b = document.body.style;
-      b.position = "fixed"; b.top = `-${lockedY}px`;
-      b.left = b.right = "0"; b.width = b.height = "100%";
-      b.overscrollBehavior = "none";
-    }
-    function unlock() {
-      if (!locked) return;
-      locked = false;
-      const y = lockedY, b = document.body.style;
-      b.position = b.top = b.left = b.right = b.width = b.height = b.overscrollBehavior = "";
-      window.scrollTo(0, y);
-    }
-    lock();
-
-    function onSeeked() {
-      seeking = false;
-      if (pending !== null && video) { const t = pending; pending = null; seeking = true; video.currentTime = t; }
-    }
-    function seekTo(t: number) {
-      if (!video) return;
-      if (seeking) { pending = t; return; }
-      seeking = true; video.currentTime = t;
-    }
-
-    video.addEventListener("loadeddata", () => {
-      dur = video.duration || 0;
-      video.classList.add("rdy");
-      if (reduce) video.currentTime = dur * 0.9;
-    });
-    video.addEventListener("seeked", onSeeked);
-
-    const p = video.play();
-    if (p && p.then) p.then(() => video.pause()).catch(() => {});
-    else video.pause();
-
-    function push(dy: number) {
-      target = clamp(target + dy / SCRUB, 0, 1);
-      if (target > 0.001) started = true;
-    }
-
-    const onWheel = (e: WheelEvent) => { push(e.deltaY); e.preventDefault(); };
-    const onTouchStart = (e: TouchEvent) => { touchY = e.touches[0]?.clientY ?? 0; };
-    const onTouchMove = (e: TouchEvent) => {
-      const y = e.touches[0]?.clientY ?? touchY;
-      push(touchY - y); touchY = y; e.preventDefault();
-    };
-
-    window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-
-    function frame() {
-      current += (target - current) * 0.18;
-      if (dur > 0) seekTo(current * dur);
-
-      if (video) video.style.transform = `scale(${1 + current * 0.06})`;
-
-      const t1 = 1 - clamp(current / 0.35, 0, 1);
-      if (titleRef.current) {
-        titleRef.current.style.opacity = String(t1);
-        titleRef.current.style.transform = `translateY(${(1 - t1) * -24}px) scale(${0.96 + t1 * 0.04})`;
-        titleRef.current.style.filter = `blur(${(1 - t1) * 10}px)`;
-      }
-      if (hintRef.current) hintRef.current.style.opacity = started ? "0" : "1";
-
-      const t2 = clamp((current - 0.82) / 0.18, 0, 1);
-      if (taglineRef.current) {
-        taglineRef.current.style.opacity = String(t2);
-        taglineRef.current.style.transform = `translateY(${(1 - t2) * 20}px) scale(${0.97 + t2 * 0.03})`;
-        taglineRef.current.style.filter = `blur(${(1 - t2) * 8}px)`;
-      }
-      if (barRef.current) barRef.current.style.transform = `scaleX(${current})`;
-
-      rafId = requestAnimationFrame(frame);
-    }
-    if (!reduce) rafId = requestAnimationFrame(frame);
-
-    const onUnlock = () => unlock();
-    window.addEventListener("beforeunload", onUnlock);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("beforeunload", onUnlock);
-      unlock();
-    };
-  }, []);
-
-  return (
-    <div
-      style={{
-        position: "relative", height: "100dvh", width: "100%",
-        overflow: "hidden", background: "#05070d", touchAction: "none",
-      }}
-    >
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <video
-        ref={videoRef}
-        src="https://cdn.21st.dev/assets/mirror/21/21a77eac28eacbb7e142016eefeaa0b4a766619e51113629a3bc6df6af066c0f.mp4"
-        muted
-        playsInline
-        preload="auto"
-        style={{
-          position: "absolute", inset: 0, width: "100%", height: "100%",
-          objectFit: "cover", pointerEvents: "none", opacity: 0,
-          transition: "opacity .6s", willChange: "transform",
-        }}
-        className="hero-video"
-      />
-      {/* gradient overlay */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: "linear-gradient(180deg,rgba(5,7,13,.4) 0%,rgba(5,7,13,0) 28%,rgba(5,7,13,.1) 65%,rgba(5,7,13,.65) 100%)",
-      }} />
-
-      {/* FoodNex logo / title */}
-      <div ref={titleRef} style={{
-        position: "absolute", inset: 0,
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        textAlign: "center", padding: "0 6%",
-        pointerEvents: "none", willChange: "transform,opacity,filter",
-      }}>
-        <div style={{
-          fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800,
-          fontSize: "clamp(3rem, 9vw, 7.5rem)", lineHeight: 1, letterSpacing: "-.04em",
-          color: "#f2f4f8", textShadow: "0 4px 40px rgba(0,0,0,.6)",
-        }}>
-          Food<span style={{ color: "#c94070" }}>Nex</span>
-        </div>
-        <div style={{
-          marginTop: 16, fontFamily: "'Inter', system-ui, sans-serif",
-          fontSize: "clamp(.85rem,1.8vw,1.1rem)", fontWeight: 500,
-          letterSpacing: ".12em", textTransform: "uppercase",
-          color: "rgba(242,244,248,.65)",
-        }}>
-          Gestão inteligente de restaurantes
-        </div>
-      </div>
-
-      {/* tagline shown at end of scroll */}
-      <div ref={taglineRef} style={{
-        position: "absolute", inset: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        textAlign: "center", padding: "0 8%",
-        opacity: 0, pointerEvents: "none", willChange: "transform,opacity,filter",
-      }}>
-        <span style={{
-          fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 700,
-          fontSize: "clamp(1.3rem,3.5vw,3rem)", lineHeight: 1.2, letterSpacing: "-.01em",
-          color: "#f2f4f8", textShadow: "0 4px 30px rgba(0,0,0,.5)",
-        }}>
-          Do cardápio à cozinha.<br />Do pedido à entrega.
-        </span>
-      </div>
-
-      {/* scroll hint */}
-      <div ref={hintRef} style={{
-        position: "absolute", left: "50%", bottom: "clamp(20px,6vh,52px)",
-        transform: "translateX(-50%)",
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-        color: "rgba(240,244,248,.7)", fontFamily: "'Inter', system-ui, sans-serif",
-        fontSize: "clamp(9px,1.3vw,11px)", fontWeight: 600, letterSpacing: ".3em",
-        transition: "opacity .4s", pointerEvents: "none",
-      }}>
-        <span>SCROLL</span>
-        <svg width="14" height="18" viewBox="0 0 14 18" aria-hidden>
-          <path d="M7 1L7 17M2 12L7 17L12 12" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-
-      {/* progress bar */}
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: "rgba(255,255,255,.1)" }}>
-        <div ref={barRef} style={{
-          height: "100%", width: "100%",
-          background: "linear-gradient(90deg,rgba(201,64,112,.7),#c94070)",
-          transform: "scaleX(0)", transformOrigin: "left",
-        }} />
-      </div>
-
-      <style>{`.hero-video.rdy { opacity: 1 !important; }`}</style>
-    </div>
-  );
-}
+import { useState } from "react";
 
 /* ─────────────── BENTO MOCKUPS ─────────────── */
 function BentoMockups() {
@@ -643,7 +432,50 @@ export default function LandingPage() {
       </header>
 
       {/* HERO */}
-      <ScrollHero />
+      <section style={{ padding: "96px 24px 80px", textAlign: "center", background: "var(--background)" }}>
+        <div style={{ maxWidth: 760, marginInline: "auto" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 99,
+            border: "1px solid rgba(201,64,112,.3)", background: "rgba(201,64,112,.06)",
+            padding: "6px 16px", fontSize: ".78rem", fontWeight: 600, color: "var(--wine)",
+            marginBottom: 32,
+          }}>
+            7 dias grátis · sem cartão de crédito
+          </div>
+          {/* Logo placeholder — substituir por <Image> quando logo chegar */}
+          <h1 style={{
+            fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800,
+            fontSize: "clamp(2.8rem,8vw,6rem)", lineHeight: 1, letterSpacing: "-.04em",
+            color: "var(--foreground)",
+          }}>
+            Food<span style={{ color: "var(--wine)" }}>Nex</span>
+          </h1>
+          <p style={{
+            marginTop: 20, fontSize: "clamp(1rem,2vw,1.25rem)", color: "var(--muted)", lineHeight: 1.6,
+          }}>
+            Do cardápio à cozinha. Do pedido à entrega.<br />
+            Gestão inteligente para restaurantes modernos.
+          </p>
+          <div style={{ marginTop: 36, display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
+            <Link href="/cadastro" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "var(--wine)", color: "#fff",
+              fontFamily: "'Sora', system-ui, sans-serif", fontSize: "1rem", fontWeight: 700,
+              padding: "14px 32px", borderRadius: 14,
+            }}>
+              Começar teste grátis
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
+            <a href="#sistema" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              border: "1px solid var(--border)", color: "var(--muted)",
+              fontSize: "1rem", fontWeight: 600, padding: "14px 32px", borderRadius: 14,
+            }}>
+              Ver o sistema
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* PROOF BAR */}
       <div style={{ borderBlock: "1px solid var(--border)", background: "var(--card)", paddingBlock: 22 }}>
