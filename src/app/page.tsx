@@ -2,731 +2,695 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
-/* ─────────────── BENTO MOCKUPS ─────────────── */
-function BentoMockups() {
+/* ── Scroll-reveal hook ── */
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold: 0.12 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return { ref, visible };
+}
+
+/* ── Animated counter ── */
+function Counter({ to, prefix = "", suffix = "" }: { to: number; prefix?: string; suffix?: string }) {
+  const [val, setVal] = useState(0);
+  const { ref, visible } = useReveal();
+  useEffect(() => {
+    if (!visible) return;
+    let start = 0;
+    const step = to / 60;
+    const id = setInterval(() => {
+      start += step;
+      if (start >= to) { setVal(to); clearInterval(id); } else setVal(Math.floor(start));
+    }, 16);
+    return () => clearInterval(id);
+  }, [visible, to]);
+  return <span ref={ref}>{prefix}{val.toLocaleString("pt-BR")}{suffix}</span>;
+}
+
+/* ── Section wrapper with reveal ── */
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { ref, visible } = useReveal();
   return (
-    <section style={{ padding: "96px 0" }} id="sistema">
-      <div style={{ maxWidth: 1140, marginInline: "auto", paddingInline: 24 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <h2 style={{ fontSize: "clamp(1.7rem,4vw,2.6rem)", fontWeight: 800 }}>Veja o sistema em ação</h2>
-          <p style={{ marginTop: 10, color: "var(--muted)" }}>Cada tela pensada para o dia a dia do seu restaurante.</p>
-        </div>
-        <div className="bento-grid">
-
-          {/* DASHBOARD */}
-          <div className="bcard bc-dashboard">
-            <div className="mk-dashboard">
-              <div className="mk-db-top">
-                <div className="mk-stat"><div className="val">R$3.240</div><div className="lbl">Faturamento hoje</div><div className="delta">+12% vs ontem</div></div>
-                <div className="mk-stat"><div className="val">47</div><div className="lbl">Pedidos hoje</div><div className="delta">+8 vs ontem</div></div>
-                <div className="mk-stat"><div className="val">R$68,90</div><div className="lbl">Ticket médio</div><div className="delta">+R$4,20</div></div>
-              </div>
-              <div className="mk-chart">
-                <div className="mk-chart-title">Pedidos por hora</div>
-                <div className="chart-bars">
-                  {[20,15,10,18,35,55,70,90,75,60,45,38].map((h,i)=>(
-                    <span key={i} style={{ height: `${h}%`, opacity: h===90?1:.7 }} />
-                  ))}
-                </div>
-              </div>
-              <div className="mk-orders">
-                <div className="mk-order-row"><span className="num">#0041</span><span className="name">Mesa 3 — 2x Pizza, 1x Suco</span><span className="status s-prep">Em preparo</span></div>
-                <div className="mk-order-row"><span className="num">#0040</span><span className="name">Delivery — Rua das Flores, 120</span><span className="status s-entregue">Saiu entrega</span></div>
-                <div className="mk-order-row"><span className="num">#0039</span><span className="name">Retirada — João Silva</span><span className="status s-pronto">Pronto</span></div>
-                <div className="mk-order-row"><span className="num">#0038</span><span className="name">Mesa 7 — 1x Hambúrguer, 2x Refri</span><span className="status s-aguard">Aguardando</span></div>
-              </div>
-            </div>
-            <div className="bcard-label"><h3>Dashboard</h3><p>Visão geral em tempo real — pedidos, faturamento e métricas</p></div>
-          </div>
-
-          {/* KITCHEN */}
-          <div className="bcard bc-kitchen">
-            <div className="mk-kitchen">
-              <div className="mk-kitchen-head"><span>Cozinha</span><span style={{ color: "var(--wine)", fontSize: ".65rem", fontWeight: 700 }}>● 4 ativos</span></div>
-              {[
-                { id: "#0041", name: "Mesa 3 — 2 itens", items: "2x Pizza Margherita · 1x Suco Laranja", fill: "85%", cls: "hot", time: "18min", urgent: true },
-                { id: "#0040", name: "Delivery — Rua das Flores", items: "1x X-Bacon · 1x Batata Frita G", fill: "55%", cls: "warn", time: "11min", urgent: false },
-                { id: "#0039", name: "Retirada — João Silva", items: "1x Combo Frango", fill: "20%", cls: "", time: "4min", urgent: false },
-              ].map(k => (
-                <div key={k.id} className={`mk-kcard${k.urgent ? " urgent" : ""}`}>
-                  <div className="knum">{k.id}</div>
-                  <div className="kname">{k.name}</div>
-                  <div className="kitems">{k.items}</div>
-                  <div className="ktime">
-                    <div className="ktime-bar"><div className={`ktime-fill${k.cls ? ` ${k.cls}` : ""}`} style={{ width: k.fill }} /></div>
-                    <span style={{ fontSize: ".58rem", fontWeight: 700, color: k.cls === "hot" ? "#f87171" : k.cls === "warn" ? "var(--amber)" : "var(--green)" }}>{k.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="bcard-label"><h3>Painel da Cozinha</h3><p>Fila de preparo com temporizadores e prioridade</p></div>
-          </div>
-
-          {/* MENU MOBILE */}
-          <div className="bcard bc-menu-mobile">
-            <div className="mk-phone">
-              <div className="mk-phone-bar">
-                <div>
-                  <div className="rest">Restaurante Sabor & Arte</div>
-                  <div className="sub-rest">Aberto agora · Entrega ~35min</div>
-                </div>
-              </div>
-              <div className="mk-menu-items">
-                <div className="mk-menu-cat">Pizzas</div>
-                {[
-                  { emoji: "🍕", bg: "#2a1a1a", name: "Pizza Margherita", desc: "Molho, mussarela, manjericão", price: "R$38" },
-                  { emoji: "🫑", bg: "#1a2a1a", name: "Pizza Calabresa", desc: "Molho, calabresa, cebola", price: "R$42" },
-                ].map(item => (
-                  <div key={item.name} className="mk-menu-item">
-                    <div className="mk-item-img" style={{ background: item.bg }}>{item.emoji}</div>
-                    <div className="mk-item-info">
-                      <div className="mk-item-name">{item.name}</div>
-                      <div className="mk-item-desc">{item.desc}</div>
-                    </div>
-                    <div><div className="mk-item-price">{item.price}</div><div className="mk-add-btn">+</div></div>
-                  </div>
-                ))}
-                <div className="mk-menu-cat">Hambúrgueres</div>
-                {[
-                  { emoji: "🍔", bg: "#2a1f0a", name: "X-Bacon", desc: "180g, bacon, queijo, alface", price: "R$32" },
-                  { emoji: "🥤", bg: "#0a1a2a", name: "Suco Natural", desc: "Laranja, limão ou maracujá", price: "R$12" },
-                ].map(item => (
-                  <div key={item.name} className="mk-menu-item">
-                    <div className="mk-item-img" style={{ background: item.bg }}>{item.emoji}</div>
-                    <div className="mk-item-info">
-                      <div className="mk-item-name">{item.name}</div>
-                      <div className="mk-item-desc">{item.desc}</div>
-                    </div>
-                    <div><div className="mk-item-price">{item.price}</div><div className="mk-add-btn">+</div></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bcard-label"><h3>Cardápio Digital</h3><p>Menu online com QR code — cliente pede pelo celular</p></div>
-          </div>
-
-          {/* TRACKING */}
-          <div className="bcard bc-tracking">
-            <div className="mk-track">
-              <div className="mk-track-code">Pedido #0041</div>
-              <div className="mk-track-title">Em preparo na cozinha</div>
-              <div className="mk-steps">
-                {[
-                  { dot: "✓", dotCls: "done", lineCls: "done", label: "Recebido", sub: "" },
-                  { dot: "2", dotCls: "active", lineCls: "", label: "Em preparo", sub: "Na cozinha agora" },
-                  { dot: "3", dotCls: "", lineCls: "", label: "Saiu para entrega", sub: "" },
-                  { dot: "4", dotCls: "", lineCls: null, label: "Entregue!", sub: "" },
-                ].map((s, i) => (
-                  <div key={i} className="mk-step">
-                    <div className="mk-step-left">
-                      <div className={`mk-step-dot${s.dotCls ? ` ${s.dotCls}` : ""}`}>{s.dot}</div>
-                      {s.lineCls !== null && <div className={`mk-step-line${s.lineCls ? ` ${s.lineCls}` : ""}`} />}
-                    </div>
-                    <div className="mk-step-text">
-                      <div className={`st${s.dotCls ? ` ${s.dotCls}` : ""}`}>{s.label}</div>
-                      {s.sub && <div className="sd">{s.sub}</div>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bcard-label"><h3>Rastreio do Pedido</h3><p>Cliente acompanha em tempo real no celular</p></div>
-          </div>
-
-          {/* TABLES */}
-          <div className="bcard bc-tables">
-            <div className="mk-tables">
-              <div style={{ fontSize: ".65rem", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Mapa de Mesas</div>
-              <div className="mk-tables-grid">
-                {["occ","","occ","part","","occ","part",""].map((cls, i) => (
-                  <div key={i} className={`mk-table${cls ? ` ${cls}` : ""}`}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" width={12} height={12}>
-                      <rect x="3" y="9" width="18" height="3" rx="1"/><path d="M6 12v6M18 12v6"/>
-                    </svg>
-                    Mesa {i+1}
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
-                {[["var(--wine)","Ocupada"],["var(--amber)","Conta pedida"],["var(--border)","Livre"]].map(([color, label]) => (
-                  <span key={label} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: ".6rem", color: color === "var(--border)" ? "var(--muted)" : color }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, display: "inline-block" }} />
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="bcard-label"><h3>Gestão de Mesas</h3><p>Mapa de ocupação com QR code por assento</p></div>
-          </div>
-
-          {/* DELIVERY */}
-          <div className="bcard bc-delivery">
-            <div className="mk-delivery">
-              <div style={{ fontSize: ".65rem", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Entregas ativas</div>
-              {[
-                { id: "#0040", addr: "Rua das Flores, 120 — Apto 4", eta: "Entregador: Carlos · ~8 min", pct: "72%", bColor: "var(--wine)", badge: "Saiu", badgeStyle: { background: "rgba(201,64,112,.15)", color: "var(--wine)" } },
-                { id: "#0037", addr: "Av. Brasil, 850 — Bl. B", eta: "Entregador: Ana · 2 min atrás", pct: "100%", bColor: "var(--green)", badge: "Entregue", badgeStyle: { background: "rgba(74,222,128,.15)", color: "var(--green)" } },
-                { id: "#0042", addr: "Rua Ipê, 33", eta: "Aguardando entregador", pct: "30%", bColor: "var(--blue)", badge: "Preparando", badgeStyle: { background: "rgba(96,165,250,.15)", color: "var(--blue)" } },
-              ].map(d => (
-                <div key={d.id} className="mk-del-row">
-                  <div className="dtop">
-                    <div className="dnum">{d.id}</div>
-                    <span style={{ fontSize: ".58rem", fontWeight: 700, padding: "2px 7px", borderRadius: 99, ...d.badgeStyle }}>{d.badge}</span>
-                  </div>
-                  <div className="daddr">{d.addr}</div>
-                  <div className="deta">{d.eta}</div>
-                  <div className="prog"><span style={{ width: d.pct, background: d.bColor }} /></div>
-                </div>
-              ))}
-            </div>
-            <div className="bcard-label"><h3>Gestão de Entregas</h3><p>Controle de entregadores e status em tempo real</p></div>
-          </div>
-
-          {/* REPORTS */}
-          <div className="bcard bc-reports">
-            <div className="mk-reports">
-              <div className="mk-rep-left">
-                <div style={{ display: "flex", gap: 10 }}>
-                  <div className="mk-rep-card" style={{ flex: 1 }}><div className="rl">Faturamento do mês</div><div className="rv">R$ 48.230</div></div>
-                  <div className="mk-rep-card" style={{ flex: 1 }}><div className="rl">Total de pedidos</div><div className="rv">842</div></div>
-                </div>
-                <div className="mk-big-chart">
-                  <div className="ct">Faturamento diário — outubro</div>
-                  <svg width="100%" viewBox="0 0 280 60" preserveAspectRatio="none" height="56">
-                    <defs>
-                      <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#c94070" stopOpacity=".4" />
-                        <stop offset="100%" stopColor="#c94070" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M0,45 C20,40 40,50 60,35 C80,20 100,30 120,22 C140,14 160,28 180,18 C200,8 220,20 240,12 C260,4 280,10 280,8 L280,60 L0,60 Z" fill="url(#ag)" />
-                    <path d="M0,45 C20,40 40,50 60,35 C80,20 100,30 120,22 C140,14 160,28 180,18 C200,8 220,20 240,12 C260,4 280,10 280,8" fill="none" stroke="#c94070" strokeWidth="1.5" />
-                  </svg>
-                </div>
-              </div>
-              <div className="mk-rep-right">
-                <div style={{ fontSize: ".65rem", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Top produtos</div>
-                <div className="mk-rep-list">
-                  {[["Pizza Margherita","R$3.840"],["X-Bacon","R$2.960"],["Combo Frango","R$2.420"],["Batata Frita G","R$1.890"],["Suco Natural","R$1.260"]].map(([n,v])=>(
-                    <div key={n} className="mk-rep-item"><span>{n}</span><b>{v}</b></div>
-                  ))}
-                </div>
-                <div className="mk-rep-card" style={{ marginTop: "auto" }}>
-                  <div className="rl">Fechamento de hoje</div>
-                  <div className="rv" style={{ fontSize: "1.1rem" }}>R$ 3.240</div>
-                  <div style={{ fontSize: ".62rem", color: "var(--green)", marginTop: 2 }}>47 pedidos · ticket R$68,90</div>
-                </div>
-              </div>
-            </div>
-            <div className="bcard-label"><h3>Relatórios & Fechamento de Caixa</h3><p>Análise de vendas, top produtos e fechamento diário</p></div>
-          </div>
-
-          {/* WAITER */}
-          <div className="bcard bc-waiter">
-            <div className="mk-waiter">
-              <div className="mk-waiter-head">
-                App do Garçom
-                <div className="mk-waiter-sub">Turno: noite · 3 mesas ativas</div>
-              </div>
-              <div className="mk-notif">
-                <span className="bell">🔔</span>
-                <div className="ntxt"><span>Mesa 4</span> pediu a conta</div>
-              </div>
-              <div className="mk-waiter-tabs">
-                <div className="mk-wtab a">Minhas mesas</div>
-                <div className="mk-wtab">Chamados</div>
-              </div>
-              {[["Mesa 1","2x Pizza · 2x Refri","22min · R$120,00"],["Mesa 3","1x X-Bacon · 1x Suco","8min · R$44,00"],["Mesa 7","3x Combo Frango","3min · R$138,00"]].map(([n,i,t])=>(
-                <div key={n} className="mk-wcard">
-                  <div className="wn">{n}</div>
-                  <div className="wi">{i}</div>
-                  <div className="wt">Pedido há {t}</div>
-                </div>
-              ))}
-            </div>
-            <div className="bcard-label"><h3>App do Garçom</h3><p>Pedidos e chamadas de mesa direto no celular</p></div>
-          </div>
-
-          {/* SETTINGS */}
-          <div className="bcard bc-settings">
-            <div className="mk-settings">
-              <div className="mk-stabs">
-                <div className="mk-stab a">Empresa</div>
-                <div className="mk-stab">Mesas</div>
-              </div>
-              <div className="mk-field"><div className="fl">Nome do restaurante</div><div className="fv">Sabor & Arte</div></div>
-              <div className="mk-field"><div className="fl">Link do cardápio</div><div className="fv" style={{ color: "var(--wine)" }}>foodnex.app/sabor-arte</div></div>
-              <div className="mk-toggle-row">
-                <div><div className="tl">Aceitar pedidos</div><div className="tls">Restaurante aberto ao público</div></div>
-                <div className="mk-tog" />
-              </div>
-              <div className="mk-toggle-row">
-                <div><div className="tl">Delivery ativo</div><div className="tls">Receber pedidos de entrega</div></div>
-                <div className="mk-tog" />
-              </div>
-              <div className="mk-field"><div className="fl">Taxa de entrega</div><div className="fv">R$ 5,00</div></div>
-            </div>
-            <div className="bcard-label"><h3>Configurações</h3><p>Horários, taxas, cardápio e controles do restaurante</p></div>
-          </div>
-
-        </div>
-      </div>
-    </section>
+    <div ref={ref} className={className} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? "translateY(0)" : "translateY(40px)",
+      transition: `opacity .7s ease ${delay}ms, transform .7s ease ${delay}ms`,
+    }}>
+      {children}
+    </div>
   );
 }
 
-/* ─────────────── PRICING ─────────────── */
-type BillingCycle = "mensal" | "anual";
+/* ═══════════════════════ MOCKUPS ═══════════════════════ */
 
-function Pricing() {
-  const [billing, setBilling] = useState<BillingCycle>("anual");
-  const monthly = 179.9, annual = 97.9;
-  const price = billing === "mensal" ? monthly : annual;
-  const annualTotal = annual * 12;
-  const annualSaving = monthly * 12 - annualTotal;
-  const items = [
-    "Pedidos ilimitados","Usuários ilimitados","Cardápio digital com QR code",
-    "Painel da cozinha em tempo real","Mesas, delivery e retirada",
-    "App do garçom","Relatórios e fechamento de caixa",
-    "Notificações WhatsApp","Suporte via chat","Atualizações incluídas",
+function DashboardMockup() {
+  return (
+    <div style={{ background: "#13131a", borderRadius: 16, overflow: "hidden", fontSize: "10px", border: "1px solid #2a2a3a", boxShadow: "0 24px 80px rgba(0,0,0,.7)" }}>
+      {/* top bar */}
+      <div style={{ background: "#0d0d14", padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #2a2a3a" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 8, color: "#666", fontSize: 9 }}>Dashboard · FoodNex</span>
+      </div>
+      <div style={{ padding: 12 }}>
+        {/* stats row */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+          {[
+            { val: "R$3.240", lbl: "Faturamento hoje", delta: "+12%", color: "#22c55e" },
+            { val: "47", lbl: "Pedidos hoje", delta: "+8 vs ontem", color: "#3b82f6" },
+            { val: "R$68,90", lbl: "Ticket médio", delta: "+R$4,20", color: "#a855f7" },
+          ].map((s) => (
+            <div key={s.lbl} style={{ background: "#1a1a2a", borderRadius: 10, padding: "10px 10px 8px", border: "1px solid #2a2a3a" }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#f5f5f5" }}>{s.val}</div>
+              <div style={{ fontSize: 8.5, color: "#888", marginTop: 2 }}>{s.lbl}</div>
+              <div style={{ fontSize: 8, color: s.color, marginTop: 4, fontWeight: 600 }}>↑ {s.delta}</div>
+            </div>
+          ))}
+        </div>
+        {/* bar chart */}
+        <div style={{ background: "#1a1a2a", borderRadius: 10, padding: 10, marginBottom: 10, border: "1px solid #2a2a3a" }}>
+          <div style={{ fontSize: 8.5, fontWeight: 600, color: "#aaa", marginBottom: 8 }}>Pedidos por hora</div>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
+            {[20,15,30,45,55,70,90,80,65,50,38,25].map((h, i) => (
+              <div key={i} style={{ flex: 1, background: i === 6 ? "#c94070" : "rgba(201,64,112,.35)", borderRadius: 3, height: `${h}%`, transition: "height .3s" }} />
+            ))}
+          </div>
+        </div>
+        {/* order rows */}
+        {[
+          { num: "#0041", name: "Mesa 3 — 2x Pizza, 1x Suco", status: "Em preparo", sc: "#3b82f6" },
+          { num: "#0040", name: "Delivery — Rua das Flores, 120", status: "Saiu entrega", sc: "#a855f7" },
+          { num: "#0039", name: "Retirada — João Silva", status: "Pronto", sc: "#22c55e" },
+          { num: "#0038", name: "Mesa 7 — 1x Hambúrguer, 2x Refri", status: "Aguardando", sc: "#f59e0b" },
+        ].map((o) => (
+          <div key={o.num} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: "1px solid #1e1e2e" }}>
+            <span style={{ fontSize: 8.5, fontWeight: 700, color: "#c94070", minWidth: 32 }}>{o.num}</span>
+            <span style={{ fontSize: 8.5, color: "#ccc", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</span>
+            <span style={{ fontSize: 7.5, fontWeight: 700, color: o.sc, background: o.sc + "22", borderRadius: 99, padding: "2px 6px", whiteSpace: "nowrap" }}>{o.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CozinhaMockup() {
+  const cols = [
+    { label: "Aguardando", color: "#f59e0b", count: 2, orders: [
+      { id: "#0042", name: "Mesa 5", items: "1x Pizza 4 Queijos, 2x Suco" },
+      { id: "#0043", name: "Delivery — Carlos", items: "1x X-Burguer Duplo" },
+    ]},
+    { label: "Em preparo", color: "#3b82f6", count: 2, orders: [
+      { id: "#0041", name: "Mesa 3", items: "2x Pizza Margherita · 1x Suco" },
+      { id: "#0040", name: "Retirada — João", items: "1x Combo Frango" },
+    ]},
+    { label: "Prontos", color: "#22c55e", count: 1, orders: [
+      { id: "#0039", name: "Delivery — Ana", items: "2x Caldo de Cana, 1x Batata" },
+    ]},
   ];
   return (
-    <section id="precos" style={{ padding: "96px 0", borderTop: "1px solid var(--border)" }}>
-      <div style={{ maxWidth: 1140, marginInline: "auto", paddingInline: 24 }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <h2 style={{ fontSize: "clamp(1.7rem,4vw,2.6rem)", fontWeight: 800 }}>Plano simples, sem surpresas</h2>
-          <p style={{ marginTop: 10, color: "var(--muted)" }}>Um único plano com tudo incluso. Sem limite de usuários ou pedidos.</p>
+    <div style={{ background: "#13131a", borderRadius: 16, overflow: "hidden", border: "1px solid #2a2a3a", boxShadow: "0 24px 80px rgba(0,0,0,.7)" }}>
+      <div style={{ background: "#0d0d14", padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #2a2a3a" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 8, color: "#666", fontSize: 9 }}>Cozinha · FoodNex</span>
+        <span style={{ marginLeft: "auto", fontSize: 8, color: "#c94070", fontWeight: 700 }}>● 5 pedidos ativos</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: 12, fontSize: 10 }}>
+        {cols.map((col) => (
+          <div key={col.label}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.color }} />
+              <span style={{ fontWeight: 700, color: col.color, fontSize: 9 }}>{col.label}</span>
+              <span style={{ marginLeft: "auto", background: col.color + "22", color: col.color, borderRadius: 99, padding: "1px 6px", fontSize: 8, fontWeight: 700 }}>{col.count}</span>
+            </div>
+            {col.orders.map((o) => (
+              <div key={o.id} style={{ background: "#1a1a2a", borderRadius: 8, padding: 8, marginBottom: 6, border: `1px solid ${col.color}33` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{ fontWeight: 700, color: "#c94070", fontSize: 9 }}>{o.id}</span>
+                  <span style={{ fontSize: 8, color: col.color }}>● {col.label === "Aguardando" ? "novo" : col.label === "Em preparo" ? "cozinhando" : "pronto"}</span>
+                </div>
+                <div style={{ fontSize: 9, color: "#e5e5e5", fontWeight: 600, marginBottom: 3 }}>{o.name}</div>
+                <div style={{ fontSize: 8, color: "#888" }}>{o.items}</div>
+                <button style={{ marginTop: 6, width: "100%", background: col.color + "22", border: `1px solid ${col.color}44`, borderRadius: 6, padding: "3px 0", fontSize: 8, fontWeight: 700, color: col.color, cursor: "pointer" }}>
+                  {col.label === "Aguardando" ? "Aceitar" : col.label === "Em preparo" ? "Marcar Pronto" : "Concluir"}
+                </button>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MesasMockup() {
+  const tables = [
+    { n: 1, status: "livre", value: null },
+    { n: 2, status: "ocupada", value: "R$124,00" },
+    { n: 3, status: "ocupada", value: "R$87,50" },
+    { n: 4, status: "livre", value: null },
+    { n: 5, status: "encerrada", value: "R$210,00" },
+    { n: 6, status: "ocupada", value: "R$43,00" },
+    { n: 7, status: "livre", value: null },
+    { n: 8, status: "ocupada", value: "R$156,90" },
+  ];
+  const styles: Record<string, { border: string; bg: string; badge: string; lbl: string }> = {
+    livre:     { border: "#22c55e55", bg: "#22c55e0d", badge: "#22c55e22", lbl: "#22c55e" },
+    ocupada:   { border: "#ef444455", bg: "#ef44440d", badge: "#ef444422", lbl: "#ef4444" },
+    encerrada: { border: "#f59e0b55", bg: "#f59e0b0d", badge: "#f59e0b22", lbl: "#f59e0b" },
+  };
+  return (
+    <div style={{ background: "#13131a", borderRadius: 16, overflow: "hidden", border: "1px solid #2a2a3a", boxShadow: "0 24px 80px rgba(0,0,0,.7)" }}>
+      <div style={{ background: "#0d0d14", padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #2a2a3a" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 8, color: "#666", fontSize: 9 }}>Mesas · FoodNex</span>
+      </div>
+      <div style={{ padding: 12 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 10, fontSize: 8 }}>
+          {[
+            { label: "Livres", val: 3, c: "#22c55e" },
+            { label: "Ocupadas", val: 4, c: "#ef4444" },
+            { label: "Encerrando", val: 1, c: "#f59e0b" },
+          ].map((s) => (
+            <div key={s.label} style={{ flex: 1, background: s.c + "11", border: `1px solid ${s.c}33`, borderRadius: 8, padding: "6px", textAlign: "center" }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: s.c }}>{s.val}</div>
+              <div style={{ color: "#888", fontSize: 8 }}>{s.label}</div>
+            </div>
+          ))}
         </div>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 40 }}>
-          <div style={{ display: "flex", background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: 4 }}>
-            {(["mensal","anual"] as BillingCycle[]).map(b => (
-              <button key={b} onClick={() => setBilling(b)} style={{
-                display: "flex", alignItems: "center", gap: 6,
-                fontSize: ".85rem", fontWeight: 600, padding: "9px 20px", borderRadius: 10,
-                border: "none", cursor: "pointer", fontFamily: "inherit",
-                background: billing === b ? "var(--wine)" : "transparent",
-                color: billing === b ? "#fff" : "var(--muted)",
-                transition: "all .15s",
-              }}>
-                {b === "mensal" ? "Mensal" : "Anual"}
-                {b === "anual" && (
-                  <span style={{
-                    fontSize: ".6rem", fontWeight: 700, padding: "2px 7px", borderRadius: 99,
-                    background: billing === "anual" ? "rgba(255,255,255,.2)" : "var(--wine-dim)",
-                    color: billing === "anual" ? "#fff" : "var(--wine)",
-                  }}>-45%</span>
-                )}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+          {tables.map((t) => {
+            const s = styles[t.status];
+            return (
+              <div key={t.n} style={{ border: `1px solid ${s.border}`, background: s.bg, borderRadius: 8, padding: 7, textAlign: "center" }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: "#f5f5f5" }}>Mesa {t.n}</div>
+                <div style={{ fontSize: 7.5, fontWeight: 600, color: s.lbl, marginTop: 3, background: s.badge, borderRadius: 99, padding: "1px 5px", display: "inline-block", textTransform: "capitalize" }}>{t.status}</div>
+                {t.value && <div style={{ fontSize: 9, fontWeight: 700, color: "#ccc", marginTop: 4 }}>{t.value}</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GarcomMockup() {
+  const calls = [
+    { id: "1", table: 3, name: "Fernanda Lima", status: "pendente", time: "14:23" },
+    { id: "2", table: 7, name: "Ricardo Alves", status: "atendendo", time: "14:18" },
+    { id: "3", table: 2, name: "Julia Santos", status: "pendente", time: "14:30" },
+  ];
+  return (
+    <div style={{ background: "#13131a", borderRadius: 16, overflow: "hidden", border: "1px solid #2a2a3a", boxShadow: "0 24px 80px rgba(0,0,0,.7)" }}>
+      <div style={{ background: "#0d0d14", padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #2a2a3a" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 8, color: "#666", fontSize: 9 }}>Garçom · FoodNex</span>
+        <span style={{ marginLeft: "auto", fontSize: 8, background: "#ef444422", color: "#ef4444", borderRadius: 99, padding: "2px 7px", fontWeight: 700 }}>🔔 2 pendentes</span>
+      </div>
+      <div style={{ padding: 12, fontSize: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+          <div style={{ background: "#ef444411", border: "1px solid #ef444444", borderRadius: 10, padding: 10, textAlign: "center" }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#ef4444" }}>2</div>
+            <div style={{ fontSize: 8, color: "#ef4444aa" }}>Aguardando</div>
+          </div>
+          <div style={{ background: "#f59e0b11", border: "1px solid #f59e0b44", borderRadius: 10, padding: 10, textAlign: "center" }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#f59e0b" }}>1</div>
+            <div style={{ fontSize: 8, color: "#f59e0baa" }}>Em atendimento</div>
+          </div>
+        </div>
+        {calls.map((c) => (
+          <div key={c.id} style={{ background: "#1a1a2a", borderRadius: 10, padding: "8px 10px", marginBottom: 6, border: `1px solid ${c.status === "pendente" ? "#ef444433" : "#f59e0b33"}` }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#c940700d", border: "1px solid #c9407044", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#c94070", flexShrink: 0 }}>
+                {c.table}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>{c.name}</div>
+                <div style={{ fontSize: 8, color: "#888" }}>Mesa {c.table} · {c.time}</div>
+              </div>
+              <button style={{ background: c.status === "pendente" ? "#c9407022" : "#f59e0b22", border: `1px solid ${c.status === "pendente" ? "#c9407055" : "#f59e0b55"}`, borderRadius: 6, padding: "3px 7px", fontSize: 7.5, fontWeight: 700, color: c.status === "pendente" ? "#c94070" : "#f59e0b", cursor: "pointer", whiteSpace: "nowrap" }}>
+                {c.status === "pendente" ? "Atender" : "Concluir"}
               </button>
-            ))}
+            </div>
           </div>
-        </div>
-        <div style={{ maxWidth: 460, marginInline: "auto", background: "var(--card)", border: "2px solid var(--wine)", borderRadius: 24, padding: 40, boxShadow: "0 0 80px var(--wine-glow)" }}>
-          <p style={{ fontSize: ".72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--wine)" }}>Plano completo</p>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 6, marginTop: 12 }}>
-            <strong style={{ fontFamily: "'Sora', system-ui, sans-serif", fontSize: "3rem", fontWeight: 800, lineHeight: 1 }}>
-              R$ {price.toFixed(2).replace(".", ",")}
-            </strong>
-            <span style={{ fontSize: ".9rem", color: "var(--muted)", paddingBottom: 6 }}>/mês</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CardapioMockup() {
+  return (
+    <div style={{ background: "#13131a", borderRadius: 16, overflow: "hidden", border: "1px solid #2a2a3a", boxShadow: "0 24px 80px rgba(0,0,0,.7)" }}>
+      <div style={{ background: "#0d0d14", padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #2a2a3a" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 8, color: "#666", fontSize: 9 }}>Cardápio · FoodNex</span>
+      </div>
+      <div style={{ padding: 12, fontSize: 10 }}>
+        {/* link bar */}
+        <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "6px 10px", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 7.5, color: "#888", marginBottom: 2 }}>Link do cardápio para clientes</div>
+            <div style={{ fontSize: 8.5, color: "#c94070", fontFamily: "monospace" }}>foodnex.app/cardapio/seu-restaurante</div>
           </div>
-          {billing === "anual" && (
-            <>
-              <p style={{ fontSize: ".82rem", color: "var(--muted)", marginTop: 4 }}>Cobrado R$ {annualTotal.toFixed(2).replace(".", ",")} à vista</p>
-              <p style={{ fontSize: ".82rem", fontWeight: 600, color: "var(--green)", marginTop: 2 }}>Você economiza R$ {annualSaving.toFixed(2).replace(".", ",")} por ano</p>
-            </>
-          )}
-          <ul style={{ listStyle: "none", margin: "28px 0", display: "flex", flexDirection: "column", gap: 12 }}>
-            {items.map(item => (
-              <li key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: ".88rem" }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--wine)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-                {item}
-              </li>
-            ))}
-          </ul>
-          <Link href="/cadastro" style={{
-            width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            background: "var(--wine)", color: "#fff", fontFamily: "'Sora', system-ui, sans-serif",
-            fontSize: "1rem", fontWeight: 700, padding: "16px", borderRadius: 14,
-            transition: "background .15s",
-          }}>
-            Começar 7 dias grátis
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </Link>
-          <p style={{ textAlign: "center", fontSize: ".72rem", color: "var(--muted)", marginTop: 10 }}>Sem cartão de crédito · Cancele quando quiser</p>
+          <button style={{ background: "#c94070", border: "none", borderRadius: 6, padding: "4px 8px", fontSize: 8, fontWeight: 700, color: "#fff", cursor: "pointer" }}>Copiar</button>
         </div>
-        <p style={{ textAlign: "center", fontSize: ".72rem", color: "var(--muted)", marginTop: 28 }}>Os valores podem ser reajustados conforme novas funcionalidades forem adicionadas.</p>
+        {/* tabs */}
+        <div style={{ display: "flex", gap: 4, background: "#1a1a2a", borderRadius: 8, padding: 3, marginBottom: 10 }}>
+          {["Categorias", "Adicionais", "Produtos", "Disponibilidade"].map((t, i) => (
+            <div key={t} style={{ flex: 1, textAlign: "center", padding: "4px 0", borderRadius: 6, fontSize: 7.5, fontWeight: 600, background: i === 0 ? "#13131a" : "transparent", color: i === 0 ? "#f5f5f5" : "#888" }}>{t}</div>
+          ))}
+        </div>
+        {/* category cards */}
+        {[
+          { name: "Pizzas", items: 8, icon: "🍕" },
+          { name: "Hambúrgueres", items: 5, icon: "🍔" },
+          { name: "Bebidas", items: 12, icon: "🥤" },
+        ].map((cat) => (
+          <div key={cat.name} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "7px 10px", marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 14 }}>{cat.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>{cat.name}</div>
+              <div style={{ fontSize: 7.5, color: "#888" }}>{cat.items} produtos</div>
+            </div>
+            <button style={{ background: "#2a2a3a", border: "1px solid #3a3a4a", borderRadius: 5, padding: "2px 7px", fontSize: 7.5, color: "#aaa", cursor: "pointer" }}>Editar</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function EntregasMockup() {
+  const orders = [
+    { id: "#0041", name: "Carlos Mendes", addr: "Rua das Flores, 120", total: "R$68,00", status: "pronto" },
+    { id: "#0042", name: "Fernanda Cruz", addr: "Av. Brasil, 456 — Ap 3", total: "R$45,50", status: "saiu_entrega" },
+    { id: "#0040", name: "Ricardo Lima", addr: "Rua XV de Novembro, 88", total: "R$92,00", status: "pronto" },
+  ];
+  return (
+    <div style={{ background: "#13131a", borderRadius: 16, overflow: "hidden", border: "1px solid #2a2a3a", boxShadow: "0 24px 80px rgba(0,0,0,.7)" }}>
+      <div style={{ background: "#0d0d14", padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #2a2a3a" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 8, color: "#666", fontSize: 9 }}>Entregas · FoodNex</span>
+      </div>
+      <div style={{ padding: 12, fontSize: 10 }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+          {[
+            { label: "Prontos", val: 2, c: "#22c55e", active: true },
+            { label: "Em rota", val: 1, c: "#3b82f6", active: false },
+            { label: "Concluídos", val: 8, c: "#888", active: false },
+          ].map((s) => (
+            <div key={s.label} style={{ flex: 1, background: s.active ? s.c + "22" : "#1a1a2a", border: `1px solid ${s.active ? s.c + "55" : "#2a2a3a"}`, borderRadius: 8, padding: "5px 6px", textAlign: "center" }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: s.active ? s.c : "#666" }}>{s.val}</div>
+              <div style={{ fontSize: 7.5, color: s.active ? s.c + "cc" : "#555" }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+        {orders.map((o) => (
+          <div key={o.id} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: "8px 10px", marginBottom: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 2 }}>
+                  <span style={{ fontSize: 8.5, fontWeight: 800, color: "#c94070" }}>{o.id}</span>
+                  <span style={{ fontSize: 8.5, fontWeight: 700, color: "#e5e5e5" }}>{o.name}</span>
+                  <span style={{ fontSize: 7.5, fontWeight: 700, marginLeft: "auto", color: o.status === "pronto" ? "#22c55e" : "#3b82f6", background: o.status === "pronto" ? "#22c55e22" : "#3b82f622", borderRadius: 99, padding: "1px 5px" }}>
+                    {o.status === "pronto" ? "Pronto" : "Em rota"}
+                  </span>
+                </div>
+                <div style={{ fontSize: 8, color: "#888" }}>📍 {o.addr}</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
+              <span style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>{o.total}</span>
+              <button style={{ background: o.status === "pronto" ? "#c9407022" : "#3b82f622", border: `1px solid ${o.status === "pronto" ? "#c9407055" : "#3b82f655"}`, borderRadius: 6, padding: "3px 8px", fontSize: 7.5, fontWeight: 700, color: o.status === "pronto" ? "#c94070" : "#3b82f6", cursor: "pointer" }}>
+                {o.status === "pronto" ? "Despachar →" : "Finalizar ✓"}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════ FEATURE SECTION ═══════════════════════ */
+function FeatureSection({
+  id, label, icon, title, desc, mockup, reverse = false,
+}: {
+  id: string; label: string; icon: string; title: string; desc: string;
+  mockup: React.ReactNode; reverse?: boolean;
+}) {
+  const { ref, visible } = useReveal();
+  return (
+    <section id={id} style={{ padding: "80px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
+      <div style={{ maxWidth: 1140, marginInline: "auto", paddingInline: 24 }}>
+        <div ref={ref} style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 64,
+          alignItems: "center",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(50px)",
+          transition: "opacity .8s ease, transform .8s ease",
+        }}
+          className="feature-grid"
+        >
+          <div style={{ order: reverse ? 2 : 1 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 99, border: "1px solid rgba(201,64,112,.3)", background: "rgba(201,64,112,.08)", padding: "5px 14px", fontSize: ".75rem", fontWeight: 700, color: "#c94070", marginBottom: 20 }}>
+              <span>{icon}</span> {label}
+            </div>
+            <h2 style={{ fontSize: "clamp(1.6rem,3.5vw,2.4rem)", fontWeight: 800, lineHeight: 1.2, marginBottom: 16 }}>{title}</h2>
+            <p style={{ fontSize: "1rem", color: "var(--muted)", lineHeight: 1.7 }}>{desc}</p>
+          </div>
+          <div style={{ order: reverse ? 1 : 2 }}>{mockup}</div>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ─────────────── FAQ ─────────────── */
-const faqs = [
-  { q: "Preciso de equipamento especial?", a: "Não. O FoodNex funciona em qualquer dispositivo com navegador. Para imprimir comandas você precisará de uma impressora térmica 80mm." },
-  { q: "Posso cancelar quando quiser?", a: "Sim. Sem fidelidade. Cancele quando quiser e não será cobrado no próximo ciclo." },
-  { q: "O período de teste é gratuito?", a: "Sim, 7 dias completamente grátis, sem precisar de cartão de crédito." },
-  { q: "Quantos funcionários posso cadastrar?", a: "Ilimitado. Cozinheiros, garçons e entregadores sem custo extra." },
-  { q: "Os valores podem mudar?", a: "Podem ser reajustados com novas funcionalidades, mas clientes ativos são avisados com 30 dias de antecedência." },
-];
+/* ═══════════════════════ PRICING ═══════════════════════ */
+function Pricing() {
+  const [annual, setAnnual] = useState(false);
+  const plans = [
+    { name: "Básico", price: annual ? 89 : 99, desc: "Para começar", features: ["1 ponto de venda", "Até 300 pedidos/mês", "Dashboard básico", "Cardápio digital", "Suporte por e-mail"], cta: "Começar grátis" },
+    { name: "Profissional", price: annual ? 179 : 199, desc: "Mais popular", features: ["3 pontos de venda", "Pedidos ilimitados", "Cozinha + Entregas", "Mesas + Garçom", "Relatórios avançados", "Suporte prioritário"], cta: "Começar grátis", highlight: true },
+    { name: "Enterprise", price: annual ? 359 : 399, desc: "Para redes", features: ["Pontos de venda ilimitados", "Multi-loja", "API personalizada", "Gestor de conta dedicado", "SLA 99.9%"], cta: "Falar com vendas" },
+  ];
+  return (
+    <section id="precos" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
+      <div style={{ maxWidth: 1100, marginInline: "auto", paddingInline: 24 }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, marginBottom: 12 }}>Planos simples e transparentes</h2>
+            <p style={{ color: "var(--muted)", marginBottom: 28, fontSize: "1.05rem" }}>Sem surpresas. Cancele quando quiser.</p>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#1a1a1d", borderRadius: 99, padding: "6px 6px 6px 16px", border: "1px solid #2a2a2e" }}>
+              <span style={{ fontSize: ".85rem", color: annual ? "#666" : "#f5f5f5", fontWeight: 600 }}>Mensal</span>
+              <button onClick={() => setAnnual(!annual)} style={{ width: 44, height: 24, borderRadius: 99, background: annual ? "#c94070" : "#2a2a2e", border: "none", cursor: "pointer", position: "relative", transition: "background .3s", flexShrink: 0 }}>
+                <div style={{ position: "absolute", top: 3, left: annual ? 22 : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left .3s" }} />
+              </button>
+              <span style={{ fontSize: ".85rem", color: annual ? "#f5f5f5" : "#666", fontWeight: 600 }}>Anual</span>
+              {annual && <span style={{ fontSize: ".7rem", fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: "2px 8px" }}>-10%</span>}
+            </div>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }} className="pricing-grid">
+          {plans.map((p, i) => (
+            <Reveal key={p.name} delay={i * 100}>
+              <div style={{ position: "relative", borderRadius: 20, border: p.highlight ? "1px solid #c94070" : "1px solid #2a2a2e", background: p.highlight ? "linear-gradient(145deg,#1e0d14,#1a1a1d)" : "#13131a", padding: 32, height: "100%", boxSizing: "border-box" }}>
+                {p.highlight && <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".7rem", fontWeight: 800, padding: "3px 14px", borderRadius: "0 0 10px 10px" }}>MAIS POPULAR</div>}
+                <div style={{ fontSize: ".85rem", fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>{p.name}</div>
+                <div style={{ marginBottom: 6 }}>
+                  <span style={{ fontSize: "2.6rem", fontWeight: 900, color: "#f5f5f5" }}>R${p.price}</span>
+                  <span style={{ color: "var(--muted)", fontSize: ".85rem" }}>/mês</span>
+                </div>
+                <p style={{ fontSize: ".82rem", color: "var(--muted)", marginBottom: 24 }}>{p.desc}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {p.features.map((f) => (
+                    <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: ".85rem", color: "#d4d4d8" }}>
+                      <span style={{ color: "#22c55e", flexShrink: 0 }}>✓</span> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/cadastro" style={{ display: "block", textAlign: "center", padding: "12px 0", borderRadius: 12, fontSize: ".9rem", fontWeight: 700, background: p.highlight ? "#c94070" : "transparent", color: p.highlight ? "#fff" : "var(--muted)", border: p.highlight ? "none" : "1px solid #2a2a2e", textDecoration: "none", transition: "opacity .2s" }}>
+                  {p.cta}
+                </Link>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
+/* ═══════════════════════ FAQ ═══════════════════════ */
+const faqs = [
+  { q: "Como funciona o período gratuito?", a: "7 dias sem cartão de crédito. Acesso completo a todos os recursos do plano Profissional." },
+  { q: "Posso cancelar a qualquer momento?", a: "Sim. Sem multa, sem fidelidade. Cancele direto no painel." },
+  { q: "O sistema funciona no celular?", a: "Sim. Totalmente responsivo. Use no tablet da cozinha, no celular do garçom ou no computador do caixa." },
+  { q: "Meu cardápio é acessível para os clientes?", a: "Sim. Gera um link único do seu cardápio digital que os clientes acessam pelo celular, com pedido direto." },
+  { q: "Como os pedidos chegam na cozinha?", a: "Em tempo real. O sistema toca um alerta sonoro e exibe o pedido na tela da cozinha automaticamente." },
+];
 function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <section id="faq" style={{ padding: "96px 0", background: "var(--card)", borderTop: "1px solid var(--border)" }}>
+    <section id="faq" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
       <div style={{ maxWidth: 720, marginInline: "auto", paddingInline: 24 }}>
-        <h2 style={{ textAlign: "center", fontSize: "clamp(1.7rem,4vw,2.6rem)", fontWeight: 800, marginBottom: 48 }}>Perguntas frequentes</h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {faqs.map((item, i) => (
-            <div key={i} style={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
-              <button onClick={() => setOpen(open === i ? null : i)} style={{
-                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                gap: 16, padding: "18px 22px", background: "none", border: "none",
-                fontFamily: "inherit", fontSize: ".88rem", fontWeight: 600,
-                color: "var(--foreground)", cursor: "pointer", textAlign: "left",
-              }}>
-                {item.q}
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  style={{ flexShrink: 0, transition: "transform .2s", transform: open === i ? "rotate(180deg)" : "none" }}>
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
+        <Reveal>
+          <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.6rem)", fontWeight: 800, textAlign: "center", marginBottom: 48 }}>Perguntas frequentes</h2>
+        </Reveal>
+        {faqs.map((f, i) => (
+          <Reveal key={i} delay={i * 50}>
+            <div style={{ borderBottom: "1px solid #2a2a2e", padding: "18px 0" }}>
+              <button onClick={() => setOpen(open === i ? null : i)} style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: 0 }}>
+                <span style={{ fontSize: "1rem", fontWeight: 600, color: "#f5f5f5" }}>{f.q}</span>
+                <span style={{ fontSize: 18, color: "#c94070", flexShrink: 0, transform: open === i ? "rotate(45deg)" : "none", transition: "transform .25s" }}>+</span>
               </button>
               {open === i && (
-                <div style={{ padding: "0 22px 18px", fontSize: ".84rem", color: "var(--muted)", lineHeight: 1.7 }}>{item.a}</div>
+                <p style={{ marginTop: 12, fontSize: ".9rem", color: "var(--muted)", lineHeight: 1.7 }}>{f.a}</p>
               )}
             </div>
-          ))}
-        </div>
+          </Reveal>
+        ))}
       </div>
     </section>
   );
 }
 
-/* ─────────────── MAIN PAGE ─────────────── */
-export default function LandingPage() {
+/* ═══════════════════════ PAGE ═══════════════════════ */
+export default function Home() {
   return (
     <>
-      {/* NAV */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 100,
-        borderBottom: "1px solid var(--border)",
-        background: "color-mix(in srgb, var(--background) 82%, transparent)",
-        backdropFilter: "blur(16px)",
-      }}>
-        <div style={{ maxWidth: 1140, marginInline: "auto", paddingInline: 24, display: "flex", alignItems: "center", justifyContent: "space-between", paddingBlock: 15 }}>
-          <span style={{ fontFamily: "'Sora', system-ui, sans-serif", fontSize: "1.2rem", fontWeight: 800, color: "var(--wine)", letterSpacing: "-.02em" }}>FoodNex</span>
-          <nav style={{ display: "flex", gap: 28, fontSize: ".85rem", color: "var(--muted)" }}>
-            <a href="#sistema" style={{ transition: "color .15s" }}>Sistema</a>
-            <a href="#precos" style={{ transition: "color .15s" }}>Preços</a>
-            <a href="#faq" style={{ transition: "color .15s" }}>FAQ</a>
-          </nav>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Link href="/login" style={{ fontSize: ".85rem", color: "var(--muted)", padding: "8px 12px", borderRadius: 10 }}>Entrar</Link>
-            <Link href="/cadastro" style={{
-              fontSize: ".85rem", fontWeight: 600, background: "var(--wine)", color: "#fff",
-              padding: "9px 18px", borderRadius: 11,
-            }}>Testar grátis</Link>
-          </div>
-        </div>
-      </header>
+      <style>{`
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+        @keyframes glow  { 0%,100%{opacity:.5} 50%{opacity:1} }
+        @keyframes spin  { to{transform:rotate(360deg)} }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+        .feature-grid { grid-template-columns: 1fr 1fr; }
+        @media(max-width:768px){
+          .feature-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .feature-grid > div { order: unset !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
+          .stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .nav-links { display: none !important; }
+        }
+      `}</style>
 
-      {/* HERO */}
-      <section style={{ padding: "96px 24px 80px", textAlign: "center", background: "var(--background)" }}>
-        <div style={{ maxWidth: 760, marginInline: "auto" }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 99,
-            border: "1px solid rgba(201,64,112,.3)", background: "rgba(201,64,112,.06)",
-            padding: "6px 16px", fontSize: ".78rem", fontWeight: 600, color: "var(--wine)",
-            marginBottom: 32,
-          }}>
-            7 dias grátis · sem cartão de crédito
-          </div>
-          <Image
-            src="/logo.jpg"
-            alt="FoodNex — Gestão Inteligente de Pedidos"
-            width={340}
-            height={340}
-            priority
-            style={{ marginInline: "auto", display: "block", objectFit: "contain" }}
-          />
-          <p style={{
-            marginTop: 8, fontSize: "clamp(1rem,2vw,1.2rem)", color: "var(--muted)", lineHeight: 1.6,
-          }}>
-            Do cardápio à cozinha. Do pedido à entrega.<br />
-            Gestão inteligente para restaurantes modernos.
-          </p>
-          <div style={{ marginTop: 36, display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-            <Link href="/cadastro" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              background: "var(--wine)", color: "#fff",
-              fontFamily: "'Sora', system-ui, sans-serif", fontSize: "1rem", fontWeight: 700,
-              padding: "14px 32px", borderRadius: 14,
-            }}>
-              Começar teste grátis
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </Link>
-            <a href="#sistema" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              border: "1px solid var(--border)", color: "var(--muted)",
-              fontSize: "1rem", fontWeight: 600, padding: "14px 32px", borderRadius: 14,
-            }}>
-              Ver o sistema
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* PROOF BAR */}
-      <div style={{ borderBlock: "1px solid var(--border)", background: "var(--card)", paddingBlock: 22 }}>
-        <div style={{ maxWidth: 1140, marginInline: "auto", paddingInline: 24, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "16px 40px", textAlign: "center" }}>
-          {[["7 dias","teste gratuito"],["3 modos","mesa, delivery, retirada"],["Tempo real","pedidos ao vivo"],["1 plano","tudo incluso"]].map(([v,l])=>(
-            <div key={l}>
-              <p style={{ fontFamily: "'Sora', system-ui, sans-serif", fontSize: "1.5rem", fontWeight: 800 }}>{v}</p>
-              <p style={{ fontSize: ".78rem", color: "var(--muted)" }}>{l}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* BENTO */}
-      <BentoMockups />
-
-      {/* PRICING */}
-      <Pricing />
-
-      {/* FAQ */}
-      <FAQ />
-
-      {/* CTA FINAL */}
-      <section style={{ borderTop: "1px solid var(--border)", background: "var(--wine-dim)", paddingBlock: 96, textAlign: "center" }}>
-        <div style={{ maxWidth: 720, marginInline: "auto", paddingInline: 24 }}>
-          <h2 style={{ fontSize: "clamp(1.7rem,4vw,2.6rem)", fontWeight: 800 }}>Pronto para modernizar seu restaurante?</h2>
-          <p style={{ color: "var(--muted)", margin: "12px auto 36px", maxWidth: 480 }}>Comece grátis por 7 dias. Sem burocracia, sem cartão de crédito.</p>
-          <Link href="/cadastro" style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: "var(--wine)", color: "#fff", fontFamily: "'Sora', system-ui, sans-serif",
-            fontSize: "1rem", fontWeight: 700, padding: "16px 36px", borderRadius: 16,
-          }}>
-            Criar minha conta grátis
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      {/* ── NAVBAR ── */}
+      <nav style={{ position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,.06)", background: "rgba(13,13,15,.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+        <div style={{ maxWidth: 1140, marginInline: "auto", paddingInline: 24, height: 64, display: "flex", alignItems: "center", gap: 32 }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+            <Image src="/logo.png" alt="FoodNex" width={110} height={44} style={{ objectFit: "contain" }} priority />
           </Link>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer style={{ borderTop: "1px solid var(--border)", paddingBlock: 28 }}>
-        <div style={{ maxWidth: 1140, marginInline: "auto", paddingInline: 24, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, fontSize: ".78rem", color: "var(--muted)" }}>
-          <span style={{ fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800, color: "var(--wine)" }}>FoodNex</span>
-          <span>Gestão inteligente de pedidos para restaurantes</span>
-          <div style={{ display: "flex", gap: 22 }}>
-            <Link href="/login">Entrar</Link>
-            <Link href="/cadastro">Cadastrar</Link>
+          <div className="nav-links" style={{ display: "flex", gap: 32, marginLeft: 16 }}>
+            {[
+              { label: "Sistema", href: "#dashboard" },
+              { label: "Preços", href: "#precos" },
+              { label: "FAQ", href: "#faq" },
+            ].map((l) => (
+              <a key={l.href} href={l.href} style={{ fontSize: ".9rem", color: "var(--muted)", textDecoration: "none", transition: "color .2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#f5f5f5")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
+              >{l.label}</a>
+            ))}
           </div>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
+            <Link href="/login" style={{ fontSize: ".88rem", color: "var(--muted)", textDecoration: "none", padding: "8px 16px", borderRadius: 10, transition: "color .2s" }}>Entrar</Link>
+            <Link href="/cadastro" style={{ fontSize: ".88rem", fontWeight: 700, background: "#c94070", color: "#fff", textDecoration: "none", padding: "9px 20px", borderRadius: 10, transition: "opacity .2s", whiteSpace: "nowrap" }}>Testar grátis</Link>
+          </div>
+        </div>
+      </nav>
+
+      <main>
+        {/* ── HERO ── */}
+        <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", padding: "80px 24px" }}>
+          {/* background gradients */}
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,64,112,.18) 0%, transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", top: "30%", left: "10%", width: 400, height: 400, background: "radial-gradient(circle, rgba(201,64,112,.08) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none", animation: "float 8s ease-in-out infinite" }} />
+          <div style={{ position: "absolute", top: "20%", right: "8%", width: 300, height: 300, background: "radial-gradient(circle, rgba(168,85,247,.06) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none", animation: "float 10s ease-in-out infinite reverse" }} />
+          {/* grid pattern */}
+          <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
+
+          <div style={{ position: "relative", maxWidth: 900, marginInline: "auto", textAlign: "center" }}>
+            {/* badge */}
+            <Reveal>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 99, border: "1px solid rgba(201,64,112,.35)", background: "rgba(201,64,112,.08)", padding: "6px 18px", fontSize: ".78rem", fontWeight: 700, color: "#c94070", marginBottom: 40 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#c94070", animation: "glow 2s ease-in-out infinite", display: "inline-block" }} />
+                7 dias grátis · sem cartão de crédito
+              </div>
+            </Reveal>
+
+            {/* logo */}
+            <Reveal delay={100}>
+              <div style={{ marginBottom: 32, animation: "float 6s ease-in-out infinite" }}>
+                <Image
+                  src="/logo.png"
+                  alt="FoodNex — Gestão Inteligente de Pedidos"
+                  width={280}
+                  height={280}
+                  priority
+                  style={{ objectFit: "contain", marginInline: "auto", display: "block", filter: "drop-shadow(0 0 60px rgba(201,64,112,.4))" }}
+                />
+              </div>
+            </Reveal>
+
+            <Reveal delay={200}>
+              <p style={{ fontSize: "clamp(1.05rem,2.2vw,1.3rem)", color: "var(--muted)", lineHeight: 1.7, maxWidth: 620, marginInline: "auto", marginBottom: 44 }}>
+                Do cardápio à cozinha. Do pedido à entrega.<br />
+                Gestão inteligente para restaurantes que querem crescer.
+              </p>
+            </Reveal>
+
+            <Reveal delay={300}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
+                <Link href="/cadastro" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 32px", borderRadius: 14, background: "linear-gradient(135deg,#c94070,#e0507f)", color: "#fff", fontWeight: 800, fontSize: "1rem", textDecoration: "none", boxShadow: "0 8px 40px rgba(201,64,112,.4)", transition: "transform .2s, box-shadow .2s" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 50px rgba(201,64,112,.5)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 8px 40px rgba(201,64,112,.4)"; }}
+                >
+                  Começar teste grátis →
+                </Link>
+                <a href="#dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 32px", borderRadius: 14, border: "1px solid rgba(255,255,255,.12)", color: "var(--muted)", fontSize: "1rem", fontWeight: 600, textDecoration: "none", background: "rgba(255,255,255,.04)", transition: "background .2s, color .2s" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; e.currentTarget.style.color = "#f5f5f5"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.04)"; e.currentTarget.style.color = "var(--muted)"; }}
+                >
+                  Ver o sistema ↓
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── STATS ── */}
+        <section style={{ padding: "60px 24px", borderTop: "1px solid rgba(255,255,255,.04)" }}>
+          <div style={{ maxWidth: 900, marginInline: "auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 32, textAlign: "center" }} className="stats-grid">
+              {[
+                { val: 850, prefix: "", suffix: "+", label: "Restaurantes ativos" },
+                { val: 12000, prefix: "", suffix: "+", label: "Pedidos por dia" },
+                { val: 99, prefix: "", suffix: ".9%", label: "Uptime garantido" },
+                { val: 7, prefix: "", suffix: " dias", label: "Teste grátis" },
+              ].map((s) => (
+                <Reveal key={s.label}>
+                  <div>
+                    <div style={{ fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 900, color: "#c94070" }}>
+                      <Counter to={s.val} prefix={s.prefix} suffix={s.suffix} />
+                    </div>
+                    <div style={{ fontSize: ".85rem", color: "var(--muted)", marginTop: 4 }}>{s.label}</div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FEATURE SECTIONS ── */}
+        <FeatureSection
+          id="dashboard"
+          label="Dashboard"
+          icon="📊"
+          title="Visão completa do seu negócio em tempo real"
+          desc="Acompanhe faturamento, quantidade de pedidos e ticket médio do dia. Veja todos os pedidos ativos — mesas, entregas e retiradas — num único painel atualizado em tempo real. Controle de caixa integrado com histórico de datas anteriores."
+          mockup={<DashboardMockup />}
+        />
+
+        <FeatureSection
+          id="cozinha"
+          label="Cozinha"
+          icon="👨‍🍳"
+          title="Cozinha organizada com visão por status"
+          desc="Pedidos chegam com alerta sonoro e aparecem automaticamente em colunas: Aguardando → Em preparo → Pronto. A equipe aceita, avança e marca pedidos concluídos com um clique. Integração automática com WhatsApp quando o pedido fica pronto."
+          mockup={<CozinhaMockup />}
+          reverse
+        />
+
+        <FeatureSection
+          id="mesas"
+          label="Mesas"
+          icon="🪑"
+          title="Gestão de mesas com status em tempo real"
+          desc="Veja todas as mesas do restaurante de um olhar — livres em verde, ocupadas em vermelho, encerrando em amarelo. Abra a comanda de cada mesa, registre pagamento por dinheiro, PIX, crédito ou débito, e libere a mesa com um clique."
+          mockup={<MesasMockup />}
+        />
+
+        <FeatureSection
+          id="garcom"
+          label="Garçom"
+          icon="🛎️"
+          title="Chamados de garçom direto do celular do cliente"
+          desc="O cliente escaneia o QR da mesa e chama o garçom pelo celular — sem precisar apertar botão físico. O chamado aparece instantaneamente na tela do garçom com nome, mesa e horário. Atenda e conclua com dois cliques."
+          mockup={<GarcomMockup />}
+          reverse
+        />
+
+        <FeatureSection
+          id="cardapio"
+          label="Cardápio"
+          icon="📋"
+          title="Cardápio digital com link único para seus clientes"
+          desc="Cadastre categorias, produtos, sabores, tamanhos e adicionais. Gere automaticamente um link do cardápio digital que seus clientes abrem no celular para fazer pedidos. Controle disponibilidade de cada item em tempo real."
+          mockup={<CardapioMockup />}
+        />
+
+        <FeatureSection
+          id="entregas"
+          label="Entregas"
+          icon="🛵"
+          title="Controle de delivery do preparo à porta do cliente"
+          desc="Acompanhe cada entrega: pronto para despachar, em rota, concluída. Ao despachar, o sistema envia automaticamente uma mensagem de WhatsApp ao cliente informando que o pedido saiu. Histórico completo de entregas do dia."
+          mockup={<EntregasMockup />}
+          reverse
+        />
+
+        <Pricing />
+        <FAQ />
+
+        {/* ── CTA FINAL ── */}
+        <section style={{ padding: "100px 24px", borderTop: "1px solid rgba(255,255,255,.04)", textAlign: "center" }}>
+          <Reveal>
+            <div style={{ maxWidth: 640, marginInline: "auto" }}>
+              <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 900, marginBottom: 16 }}>Pronto para transformar seu restaurante?</h2>
+              <p style={{ fontSize: "1.05rem", color: "var(--muted)", marginBottom: 36 }}>Comece hoje. 7 dias grátis, sem cartão de crédito.</p>
+              <Link href="/cadastro" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 40px", borderRadius: 14, background: "linear-gradient(135deg,#c94070,#e0507f)", color: "#fff", fontWeight: 800, fontSize: "1.1rem", textDecoration: "none", boxShadow: "0 8px 40px rgba(201,64,112,.4)" }}>
+                Criar conta grátis →
+              </Link>
+            </div>
+          </Reveal>
+        </section>
+      </main>
+
+      {/* ── FOOTER ── */}
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,.06)", padding: "40px 24px" }}>
+        <div style={{ maxWidth: 1140, marginInline: "auto", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center", justifyContent: "space-between" }}>
+          <Image src="/logo.png" alt="FoodNex" width={90} height={36} style={{ objectFit: "contain" }} />
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            {["Termos", "Privacidade", "Contato"].map((l) => (
+              <a key={l} href="#" style={{ fontSize: ".82rem", color: "var(--muted)", textDecoration: "none" }}>{l}</a>
+            ))}
+          </div>
+          <p style={{ fontSize: ".8rem", color: "var(--muted)" }}>© {new Date().getFullYear()} FoodNex. Todos os direitos reservados.</p>
         </div>
       </footer>
-
-      <BentoStyles />
     </>
-  );
-}
-
-/* ─────────────── BENTO CSS (injected) ─────────────── */
-function BentoStyles() {
-  return (
-    <style>{`
-      :root {
-        --wine: #c94070;
-        --wine-h: #e0507f;
-        --wine-dim: rgba(201,64,112,0.12);
-        --wine-glow: rgba(201,64,112,0.2);
-        --green: #4ade80;
-        --amber: #fbbf24;
-        --blue: #60a5fa;
-      }
-
-      .bento-grid {
-        display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        grid-auto-rows: 56px;
-        gap: 16px;
-      }
-      .bcard {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transition: border-color .2s, transform .2s;
-        position: relative;
-      }
-      .bcard:hover { border-color: var(--wine); transform: translateY(-2px); }
-      .bcard-label {
-        position: absolute; bottom: 0; left: 0; right: 0;
-        padding: 12px 16px 14px;
-        background: linear-gradient(0deg, rgba(13,13,15,.95) 0%, rgba(13,13,15,0) 100%);
-        z-index: 5;
-      }
-      .bcard-label h3 { font-size: .82rem; font-weight: 700; color: #f0f0f2; }
-      .bcard-label p { font-size: .72rem; color: rgba(240,240,242,.6); margin-top: 2px; }
-
-      .bc-dashboard   { grid-column: 1 / 8;  grid-row: 1 / 9;  }
-      .bc-kitchen     { grid-column: 8 / 13; grid-row: 1 / 6;  }
-      .bc-menu-mobile { grid-column: 8 / 11; grid-row: 6 / 14; }
-      .bc-tracking    { grid-column: 11/ 13; grid-row: 6 / 14; }
-      .bc-tables      { grid-column: 1 / 5;  grid-row: 9 / 15; }
-      .bc-delivery    { grid-column: 5 / 8;  grid-row: 9 / 15; }
-      .bc-reports     { grid-column: 1 / 7;  grid-row: 15/ 22; }
-      .bc-waiter      { grid-column: 7 / 10; grid-row: 14/ 22; }
-      .bc-settings    { grid-column: 10/ 13; grid-row: 14/ 22; }
-
-      /* DASHBOARD */
-      .mk-dashboard { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
-      .mk-db-top { display: flex; gap: 10px; }
-      .mk-stat { flex: 1; background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-      .mk-stat .val { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 800; }
-      .mk-stat .lbl { font-size: .65rem; color: var(--muted); margin-top: 1px; }
-      .mk-stat .delta { font-size: .65rem; color: var(--green); font-weight: 600; }
-      .mk-chart { flex: 1; background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-      .mk-chart-title { font-size: .68rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
-      .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 52px; }
-      .chart-bars span { flex: 1; border-radius: 4px 4px 0 0; background: var(--wine); }
-      .mk-orders { display: flex; flex-direction: column; gap: 6px; }
-      .mk-order-row { display: flex; align-items: center; gap: 8px; background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: .7rem; }
-      .mk-order-row .num { font-weight: 700; color: var(--wine); min-width: 36px; }
-      .mk-order-row .name { flex: 1; }
-      .mk-order-row .status { padding: 2px 8px; border-radius: 99px; font-size: .6rem; font-weight: 700; }
-      .s-prep { background: rgba(251,191,36,.15); color: var(--amber); }
-      .s-pronto { background: rgba(74,222,128,.15); color: var(--green); }
-      .s-entregue { background: rgba(201,64,112,.15); color: var(--wine); }
-      .s-aguard { background: rgba(96,165,250,.15); color: var(--blue); }
-
-      /* KITCHEN */
-      .mk-kitchen { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
-      .mk-kitchen-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-      .mk-kitchen-head span { font-size: .65rem; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
-      .mk-kcard { background: var(--card2, #1f1f23); border-radius: 10px; border: 1px solid var(--border); padding: 10px 12px; }
-      .mk-kcard.urgent { border-color: rgba(251,191,36,.4); }
-      .mk-kcard .knum { font-size: .65rem; color: var(--wine); font-weight: 700; }
-      .mk-kcard .kname { font-size: .75rem; font-weight: 600; margin-top: 1px; }
-      .mk-kcard .kitems { font-size: .65rem; color: var(--muted); margin-top: 3px; }
-      .mk-kcard .ktime { margin-top: 6px; display: flex; align-items: center; gap: 4px; font-size: .62rem; font-weight: 700; }
-      .ktime-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-      .ktime-fill { height: 100%; border-radius: 2px; background: var(--green); }
-      .ktime-fill.warn { background: var(--amber); }
-      .ktime-fill.hot { background: #f87171; }
-
-      /* MENU MOBILE */
-      .mk-phone { flex: 1; display: flex; flex-direction: column; background: #0d0d0f; }
-      .mk-phone-bar { background: #1a1a1d; padding: 10px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
-      .mk-phone-bar .rest { font-size: .7rem; font-weight: 700; }
-      .mk-phone-bar .sub-rest { font-size: .6rem; color: var(--muted); }
-      .mk-menu-items { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-      .mk-menu-cat { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--wine); padding: 8px 12px 4px; }
-      .mk-menu-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid rgba(42,42,46,.6); }
-      .mk-item-img { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-      .mk-item-info { flex: 1; min-width: 0; }
-      .mk-item-name { font-size: .68rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .mk-item-desc { font-size: .58rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .mk-item-price { font-size: .68rem; font-weight: 700; color: var(--wine); }
-      .mk-add-btn { width: 20px; height: 20px; border-radius: 6px; background: var(--wine); display: flex; align-items: center; justify-content: center; color: #fff; font-size: .85rem; font-weight: 700; flex-shrink: 0; }
-
-      /* TRACKING */
-      .mk-track { flex: 1; display: flex; flex-direction: column; background: #0d0d0f; padding: 14px; gap: 10px; }
-      .mk-track-code { font-size: .6rem; color: var(--muted); font-weight: 600; }
-      .mk-track-title { font-size: .78rem; font-weight: 700; }
-      .mk-steps { display: flex; flex-direction: column; gap: 0; flex: 1; }
-      .mk-step { display: flex; gap: 8px; }
-      .mk-step-left { display: flex; flex-direction: column; align-items: center; }
-      .mk-step-dot { width: 18px; height: 18px; border-radius: 99px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: .5rem; font-weight: 800; color: var(--muted); flex-shrink: 0; }
-      .mk-step-dot.done { background: var(--wine); border-color: var(--wine); color: #fff; }
-      .mk-step-dot.active { border-color: var(--wine); color: var(--wine); background: rgba(201,64,112,.1); }
-      .mk-step-line { width: 2px; flex: 1; background: var(--border); margin: 2px 0; min-height: 16px; }
-      .mk-step-line.done { background: var(--wine); }
-      .mk-step-text { padding-bottom: 14px; }
-      .mk-step-text .st { font-size: .65rem; font-weight: 600; color: var(--muted); }
-      .mk-step-text .st.done { color: var(--wine); }
-      .mk-step-text .st.active { color: var(--foreground); }
-      .mk-step-text .sd { font-size: .58rem; color: var(--muted); }
-
-      /* TABLES */
-      .mk-tables { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
-      .mk-tables-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-      .mk-table { aspect-ratio: 1; border-radius: 10px; border: 2px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .6rem; font-weight: 700; color: var(--muted); gap: 2px; }
-      .mk-table.occ { border-color: var(--wine); background: var(--wine-dim); color: var(--wine); }
-      .mk-table.part { border-color: var(--amber); background: rgba(251,191,36,.08); color: var(--amber); }
-
-      /* DELIVERY */
-      .mk-delivery { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
-      .mk-del-row { background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
-      .mk-del-row .dtop { display: flex; justify-content: space-between; align-items: center; }
-      .mk-del-row .dnum { font-size: .65rem; color: var(--wine); font-weight: 700; }
-      .mk-del-row .daddr { font-size: .68rem; font-weight: 500; }
-      .mk-del-row .deta { font-size: .6rem; color: var(--muted); }
-      .mk-del-row .prog { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
-      .mk-del-row .prog span { display: block; height: 100%; border-radius: 2px; }
-
-      /* REPORTS */
-      .mk-reports { padding: 20px; flex: 1; display: flex; gap: 16px; }
-      .mk-rep-left { flex: 1.4; display: flex; flex-direction: column; gap: 10px; }
-      .mk-rep-right { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-      .mk-rep-card { background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
-      .mk-rep-card .rv { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 800; }
-      .mk-rep-card .rl { font-size: .65rem; color: var(--muted); }
-      .mk-big-chart { flex: 1; background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-      .mk-big-chart .ct { font-size: .65rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
-      .mk-rep-list { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-      .mk-rep-item { display: flex; align-items: center; justify-content: space-between; font-size: .68rem; padding: 6px 0; border-bottom: 1px solid var(--border); }
-      .mk-rep-item span { font-weight: 500; }
-      .mk-rep-item b { color: var(--wine); }
-
-      /* WAITER */
-      .mk-waiter { flex: 1; display: flex; flex-direction: column; background: #0d0d0f; }
-      .mk-waiter-head { background: #1a1a1d; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: .72rem; font-weight: 700; }
-      .mk-waiter-sub { font-size: .6rem; color: var(--muted); font-weight: 400; }
-      .mk-notif { margin: 10px 12px; background: rgba(201,64,112,.12); border: 1px solid rgba(201,64,112,.3); border-radius: 10px; padding: 8px 10px; display: flex; gap: 8px; align-items: flex-start; }
-      .mk-notif .bell { color: var(--wine); font-size: .9rem; flex-shrink: 0; }
-      .mk-notif .ntxt { font-size: .65rem; font-weight: 500; }
-      .mk-notif .ntxt span { color: var(--wine); font-weight: 700; }
-      .mk-waiter-tabs { display: flex; gap: 4px; padding: 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
-      .mk-wtab { font-size: .62rem; font-weight: 600; padding: 6px 8px; color: var(--muted); border-bottom: 2px solid transparent; }
-      .mk-wtab.a { color: var(--wine); border-bottom-color: var(--wine); }
-      .mk-wcard { margin: 4px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; }
-      .mk-wcard .wn { font-size: .65rem; color: var(--wine); font-weight: 700; }
-      .mk-wcard .wi { font-size: .7rem; font-weight: 500; }
-      .mk-wcard .wt { font-size: .62rem; color: var(--muted); }
-
-      /* SETTINGS */
-      .mk-settings { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
-      .mk-stabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
-      .mk-stab { font-size: .62rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: var(--card2, #1f1f23); border: 1px solid var(--border); color: var(--muted); }
-      .mk-stab.a { background: var(--wine-dim); border-color: rgba(201,64,112,.4); color: var(--wine); }
-      .mk-field { background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-      .mk-field .fl { font-size: .6rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
-      .mk-field .fv { font-size: .72rem; font-weight: 500; }
-      .mk-toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--card2, #1f1f23); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-      .mk-toggle-row .tl { font-size: .72rem; font-weight: 500; }
-      .mk-toggle-row .tls { font-size: .6rem; color: var(--muted); }
-      .mk-tog { width: 32px; height: 18px; border-radius: 99px; background: var(--wine); position: relative; flex-shrink: 0; }
-      .mk-tog::after { content: ''; position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
-
-      /* RESPONSIVE */
-      @media (max-width: 900px) {
-        .bento-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
-        .bc-dashboard, .bc-kitchen, .bc-menu-mobile, .bc-tracking,
-        .bc-tables, .bc-delivery, .bc-reports, .bc-waiter, .bc-settings {
-          grid-column: auto; grid-row: auto;
-        }
-        .bcard { min-height: 220px; }
-        .bc-dashboard { grid-column: 1 / -1; min-height: 280px; }
-        .bc-reports { grid-column: 1 / -1; min-height: 280px; }
-      }
-      @media (max-width: 560px) {
-        .bento-grid { grid-template-columns: 1fr; }
-        .bc-dashboard, .bc-reports { grid-column: 1; }
-      }
-    `}</style>
   );
 }
