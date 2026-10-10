@@ -49,3 +49,40 @@ input, textarea, select {
     display: none !important;
   }
 }
+
+/* WhatsApp mockup: side-by-side on desktop, stacked on mobile */
+.whatsapp-mockup-wrap {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  overflow: hidden;
+}
+.whatsapp-browser-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .whatsapp-mockup-wrap {
+    flex-direction: column;
+    align-items: center;
+  }
+  .whatsapp-browser-wrap {
+    width: 100%;
+  }
+}
+
+/* Feature grid: side-by-side on desktop, stacked on mobile */
+.feature-grid {
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .feature-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .feature-grid > div {
+    order: unset !important;
+  }
+}

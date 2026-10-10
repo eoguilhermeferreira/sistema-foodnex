@@ -593,9 +593,9 @@ function WhatsAppPhone() {
 
 function WhatsAppMockup() {
   return (
-    <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+    <div className="whatsapp-mockup-wrap">
       <WhatsAppPhone />
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="whatsapp-browser-wrap">
       <BrowserFrame title="WhatsApp · FoodNex">
       <div style={{ padding: 14, fontSize: 10 }}>
         <div style={{ background: "#16a34a22", border: "1px solid #16a34a44", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
