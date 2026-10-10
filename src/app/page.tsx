@@ -835,12 +835,15 @@ function Pricing() {
           Plano {isAnnual ? "Anual" : "Mensal"}
         </div>
         <div style={{ display: "flex", alignItems: "flex-end", gap: 4, marginBottom: 4 }}>
-          <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f5f5f5", lineHeight: 1 }}>{isAnnual ? "R$ 97,90" : "R$ 179,90"}</span>
-          <span style={{ fontSize: ".85rem", color: "var(--muted)", paddingBottom: 6 }}>/mês</span>
+          <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f5f5f5", lineHeight: 1 }}>{isAnnual ? "R$ 1.174,80" : "R$ 179,90"}</span>
+          <span style={{ fontSize: ".85rem", color: "var(--muted)", paddingBottom: 6 }}>{isAnnual ? "/ano" : "/mês"}</span>
         </div>
-        <div style={{ fontSize: ".78rem", color: "var(--muted)", marginBottom: 20 }}>
-          {isAnnual ? "12 cobranças de R$ 97,90 via PIX" : "Cobrado mensalmente via PIX"}
-        </div>
+        {isAnnual && (
+          <div style={{ fontSize: ".78rem", color: "#4ade80", marginBottom: 20, fontWeight: 600 }}>
+            Você economiza R$ 984,00 em relação ao plano mensal
+          </div>
+        )}
+        {!isAnnual && <div style={{ marginBottom: 20 }} />}
 
         <div style={{ fontSize: ".75rem", borderRadius: 10, padding: "10px 14px", marginBottom: 24, background: isAnnual ? "rgba(248,113,113,.08)" : "rgba(34,197,94,.08)", border: `1px solid ${isAnnual ? "rgba(248,113,113,.2)" : "rgba(34,197,94,.2)"}` }}>
           <span style={{ fontWeight: 700, color: isAnnual ? "#f87171" : "#4ade80" }}>
