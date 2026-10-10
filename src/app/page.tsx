@@ -789,8 +789,89 @@ function ExperienciaClienteSection() {
 }
 
 /* ═══════════════════════ PRICING ═══════════════════════ */
+function CheckoutModal({ period, onClose }: { period: "monthly" | "annual"; onClose: () => void }) {
+  const [method, setMethod] = useState<"card" | "pix" | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleCheckout() {
+    if (!method) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ period, method }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError("Não foi possível gerar o link de pagamento. Tente novamente.");
+      }
+    } catch {
+      setError("Erro de conexão. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "#13131a", border: "1px solid #2a2a2e", borderRadius: 20, padding: "36px 32px", maxWidth: 420, width: "100%", boxSizing: "border-box" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#f5f5f5", margin: 0 }}>Escolha como pagar</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#666", fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
+        </div>
+
+        <p style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 24 }}>
+          Plano {period === "annual" ? "Anual — R$ 97,90/mês" : "Mensal — R$ 179,90/mês"}
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+          {/* Cartão */}
+          <button onClick={() => setMethod("card")} style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderRadius: 14, border: `1.5px solid ${method === "card" ? "#c94070" : "#2a2a2e"}`, background: method === "card" ? "#1e0d14" : "#1a1a1d", cursor: "pointer", textAlign: "left", transition: "border-color .2s, background .2s" }}>
+            <span style={{ fontSize: 24, flexShrink: 0 }}>💳</span>
+            <div>
+              <div style={{ fontSize: ".95rem", fontWeight: 700, color: "#f5f5f5" }}>Cartão de crédito</div>
+              <div style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 2 }}>Cobrança automática todo mês</div>
+            </div>
+            {method === "card" && <span style={{ marginLeft: "auto", color: "#c94070", fontSize: 18 }}>✓</span>}
+          </button>
+
+          {/* PIX */}
+          <button onClick={() => setMethod("pix")} style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderRadius: 14, border: `1.5px solid ${method === "pix" ? "#c94070" : "#2a2a2e"}`, background: method === "pix" ? "#1e0d14" : "#1a1a1d", cursor: "pointer", textAlign: "left", transition: "border-color .2s, background .2s" }}>
+            <span style={{ fontSize: 24, flexShrink: 0 }}>⚡</span>
+            <div>
+              <div style={{ fontSize: ".95rem", fontWeight: 700, color: "#f5f5f5" }}>PIX Automático</div>
+              <div style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 2 }}>Autorize uma vez, debita automático</div>
+            </div>
+            {method === "pix" && <span style={{ marginLeft: "auto", color: "#c94070", fontSize: 18 }}>✓</span>}
+          </button>
+        </div>
+
+        {error && <p style={{ fontSize: ".82rem", color: "#ef4444", marginBottom: 16, textAlign: "center" }}>{error}</p>}
+
+        <button
+          onClick={handleCheckout}
+          disabled={!method || loading}
+          style={{ width: "100%", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: method && !loading ? "#c94070" : "#2a2a2e", color: method && !loading ? "#fff" : "#555", border: "none", cursor: method && !loading ? "pointer" : "not-allowed", transition: "background .2s" }}
+        >
+          {loading ? "Aguarde..." : "Continuar para pagamento"}
+        </button>
+
+        <p style={{ fontSize: ".75rem", color: "var(--muted)", textAlign: "center", marginTop: 14 }}>
+          🔒 Pagamento processado com segurança pelo Sync Payments
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Pricing() {
   const [annual, setAnnual] = useState(false);
+  const [modal, setModal] = useState(false);
   const features = [
     "Dashboard completo com controle de caixa",
     "Gestão de pedidos (mesas, entregas e retiradas)",
@@ -808,61 +889,65 @@ function Pricing() {
     "Suporte prioritário",
   ];
   return (
-    <section id="precos" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
-      <div style={{ maxWidth: 860, marginInline: "auto", paddingInline: 24 }}>
-        <Reveal>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, marginBottom: 12 }}>Um plano. Tudo incluído.</h2>
-            <p style={{ color: "var(--muted)", marginBottom: 32, fontSize: "1.05rem" }}>Sem surpresas. Cancele quando quiser.</p>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#1a1a1d", borderRadius: 99, padding: "6px 6px 6px 16px", border: "1px solid #2a2a2e" }}>
-              <span style={{ fontSize: ".85rem", color: annual ? "#666" : "#f5f5f5", fontWeight: 600 }}>Mensal</span>
-              <button onClick={() => setAnnual(!annual)} style={{ width: 44, height: 24, borderRadius: 99, background: annual ? "#c94070" : "#2a2a2e", border: "none", cursor: "pointer", position: "relative", transition: "background .3s", flexShrink: 0 }}>
-                <div style={{ position: "absolute", top: 3, left: annual ? 22 : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left .3s" }} />
-              </button>
-              <span style={{ fontSize: ".85rem", color: annual ? "#f5f5f5" : "#666", fontWeight: 600 }}>Anual</span>
-              {annual && <span style={{ fontSize: ".7rem", fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: "2px 8px" }}>Economize 45%</span>}
-            </div>
-          </div>
-        </Reveal>
-
-        <Reveal delay={100}>
-          <div style={{ position: "relative", borderRadius: 24, border: "1px solid #c94070", background: "linear-gradient(145deg,#1e0d14,#1a1a1d)", padding: "48px 48px 40px", boxSizing: "border-box", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "start" }} className="pricing-card">
-            <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".7rem", fontWeight: 800, padding: "4px 18px", borderRadius: "0 0 12px 12px", whiteSpace: "nowrap" }}>
-              ACESSO COMPLETO
-            </div>
-
-            {/* Left: price */}
-            <div>
-              <div style={{ fontSize: ".9rem", fontWeight: 600, color: "var(--muted)", marginBottom: 10 }}>FoodNex</div>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 4, marginBottom: 6 }}>
-                <span style={{ fontSize: "3.6rem", fontWeight: 900, color: "#f5f5f5", lineHeight: 1 }}>
-                  {annual ? "R$ 97,90" : "R$ 179,90"}
-                </span>
+    <>
+      {modal && <CheckoutModal period={annual ? "annual" : "monthly"} onClose={() => setModal(false)} />}
+      <section id="precos" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
+        <div style={{ maxWidth: 860, marginInline: "auto", paddingInline: 24 }}>
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 56 }}>
+              <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, marginBottom: 12 }}>Um plano. Tudo incluído.</h2>
+              <p style={{ color: "var(--muted)", marginBottom: 32, fontSize: "1.05rem" }}>Sem surpresas. Cancele quando quiser.</p>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#1a1a1d", borderRadius: 99, padding: "6px 6px 6px 16px", border: "1px solid #2a2a2e" }}>
+                <span style={{ fontSize: ".85rem", color: annual ? "#666" : "#f5f5f5", fontWeight: 600 }}>Mensal</span>
+                <button onClick={() => setAnnual(!annual)} style={{ width: 44, height: 24, borderRadius: 99, background: annual ? "#c94070" : "#2a2a2e", border: "none", cursor: "pointer", position: "relative", transition: "background .3s", flexShrink: 0 }}>
+                  <div style={{ position: "absolute", top: 3, left: annual ? 22 : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left .3s" }} />
+                </button>
+                <span style={{ fontSize: ".85rem", color: annual ? "#f5f5f5" : "#666", fontWeight: 600 }}>Anual</span>
+                {annual && <span style={{ fontSize: ".7rem", fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: "2px 8px" }}>Economize 45%</span>}
               </div>
-              <div style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 24 }}>/mês{annual ? ", cobrado anualmente" : ""}</div>
-              {annual && (
-                <div style={{ fontSize: ".82rem", color: "#22c55e", background: "#22c55e11", border: "1px solid #22c55e33", borderRadius: 10, padding: "8px 14px", marginBottom: 24 }}>
-                  Equivale a R$ 1.174,80/ano — você economiza R$ 980,40
-                </div>
-              )}
-              <Link href="/cadastro" style={{ display: "block", textAlign: "center", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: "#c94070", color: "#fff", textDecoration: "none", marginBottom: 12 }}>
-                Começar agora
-              </Link>
-              <p style={{ fontSize: ".78rem", color: "var(--muted)", textAlign: "center" }}>7 dias grátis, sem cartão de crédito</p>
             </div>
+          </Reveal>
 
-            {/* Right: features */}
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 11 }}>
-              {features.map((f) => (
-                <li key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: ".88rem", color: "#d4d4d8" }}>
-                  <span style={{ color: "#22c55e", fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Reveal>
-      </div>
-    </section>
+          <Reveal delay={100}>
+            <div style={{ position: "relative", borderRadius: 24, border: "1px solid #c94070", background: "linear-gradient(145deg,#1e0d14,#1a1a1d)", padding: "48px 48px 40px", boxSizing: "border-box", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "start" }} className="pricing-card">
+              <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".7rem", fontWeight: 800, padding: "4px 18px", borderRadius: "0 0 12px 12px", whiteSpace: "nowrap" }}>
+                ACESSO COMPLETO
+              </div>
+
+              <div>
+                <div style={{ fontSize: ".9rem", fontWeight: 600, color: "var(--muted)", marginBottom: 10 }}>FoodNex</div>
+                <div style={{ marginBottom: 6 }}>
+                  <span style={{ fontSize: "3.6rem", fontWeight: 900, color: "#f5f5f5", lineHeight: 1 }}>
+                    {annual ? "R$ 97,90" : "R$ 179,90"}
+                  </span>
+                </div>
+                <div style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 24 }}>/mês{annual ? ", cobrado anualmente" : ""}</div>
+                {annual && (
+                  <div style={{ fontSize: ".82rem", color: "#22c55e", background: "#22c55e11", border: "1px solid #22c55e33", borderRadius: 10, padding: "8px 14px", marginBottom: 24 }}>
+                    Equivale a R$ 1.174,80/ano. Você economiza R$ 980,40
+                  </div>
+                )}
+                <button
+                  onClick={() => setModal(true)}
+                  style={{ display: "block", width: "100%", textAlign: "center", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: "#c94070", color: "#fff", border: "none", cursor: "pointer", marginBottom: 12 }}
+                >
+                  Assinar agora
+                </button>
+                <p style={{ fontSize: ".78rem", color: "var(--muted)", textAlign: "center" }}>7 dias grátis, sem cartão de crédito</p>
+              </div>
+
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 11 }}>
+                {features.map((f) => (
+                  <li key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: ".88rem", color: "#d4d4d8" }}>
+                    <span style={{ color: "#22c55e", fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+    </>
   );
 }
 
