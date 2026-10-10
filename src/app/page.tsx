@@ -790,19 +790,17 @@ function ExperienciaClienteSection() {
 
 /* ═══════════════════════ PRICING ═══════════════════════ */
 function CheckoutModal({ period, onClose }: { period: "monthly" | "annual"; onClose: () => void }) {
-  const [method, setMethod] = useState<"card" | "pix" | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleCheckout() {
-    if (!method) return;
     setLoading(true);
     setError("");
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ period, method }),
+        body: JSON.stringify({ period, method: "pix" }),
       });
       const data = await res.json();
       if (data.url) {
@@ -821,48 +819,41 @@ function CheckoutModal({ period, onClose }: { period: "monthly" | "annual"; onCl
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div onClick={(e) => e.stopPropagation()} style={{ background: "#13131a", border: "1px solid #2a2a2e", borderRadius: 20, padding: "36px 32px", maxWidth: 420, width: "100%", boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#f5f5f5", margin: 0 }}>Escolha como pagar</h3>
+          <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#f5f5f5", margin: 0 }}>Confirmar assinatura</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#666", fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
         </div>
 
         <p style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 24 }}>
-          Plano {period === "annual" ? "Anual — R$ 97,90/mês" : "Mensal — R$ 179,90/mês"}
+          Plano {period === "annual" ? "Anual — R$ 97,90/mês (12 cobranças)" : "Mensal — R$ 179,90/mês"}
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
-          {/* Cartão */}
-          <button onClick={() => setMethod("card")} style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderRadius: 14, border: `1.5px solid ${method === "card" ? "#c94070" : "#2a2a2e"}`, background: method === "card" ? "#1e0d14" : "#1a1a1d", cursor: "pointer", textAlign: "left", transition: "border-color .2s, background .2s" }}>
-            <span style={{ fontSize: 24, flexShrink: 0 }}>💳</span>
-            <div>
-              <div style={{ fontSize: ".95rem", fontWeight: 700, color: "#f5f5f5" }}>Cartão de crédito</div>
-              <div style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 2 }}>Cobrança automática todo mês</div>
-            </div>
-            {method === "card" && <span style={{ marginLeft: "auto", color: "#c94070", fontSize: 18 }}>✓</span>}
-          </button>
-
-          {/* PIX */}
-          <button onClick={() => setMethod("pix")} style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderRadius: 14, border: `1.5px solid ${method === "pix" ? "#c94070" : "#2a2a2e"}`, background: method === "pix" ? "#1e0d14" : "#1a1a1d", cursor: "pointer", textAlign: "left", transition: "border-color .2s, background .2s" }}>
-            <span style={{ fontSize: 24, flexShrink: 0 }}>⚡</span>
-            <div>
-              <div style={{ fontSize: ".95rem", fontWeight: 700, color: "#f5f5f5" }}>PIX Automático</div>
-              <div style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 2 }}>Autorize uma vez, debita automático</div>
-            </div>
-            {method === "pix" && <span style={{ marginLeft: "auto", color: "#c94070", fontSize: 18 }}>✓</span>}
-          </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderRadius: 14, border: "1.5px solid #c94070", background: "#1e0d14", marginBottom: 28 }}>
+          <span style={{ fontSize: 24, flexShrink: 0 }}>⚡</span>
+          <div>
+            <div style={{ fontSize: ".95rem", fontWeight: 700, color: "#f5f5f5" }}>PIX Automático</div>
+            <div style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 2 }}>Autorize uma vez, debita automático</div>
+          </div>
+          <span style={{ marginLeft: "auto", color: "#c94070", fontSize: 18 }}>✓</span>
         </div>
+
+        {period === "annual" && (
+          <div style={{ fontSize: ".78rem", color: "#f87171", background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 20 }}>
+            Ao assinar o plano anual você se compromete com 12 cobranças mensais de R$ 97,90. Sem cancelamento antecipado.
+          </div>
+        )}
 
         {error && <p style={{ fontSize: ".82rem", color: "#ef4444", marginBottom: 16, textAlign: "center" }}>{error}</p>}
 
         <button
           onClick={handleCheckout}
-          disabled={!method || loading}
-          style={{ width: "100%", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: method && !loading ? "#c94070" : "#2a2a2e", color: method && !loading ? "#fff" : "#555", border: "none", cursor: method && !loading ? "pointer" : "not-allowed", transition: "background .2s" }}
+          disabled={loading}
+          style={{ width: "100%", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: loading ? "#2a2a2e" : "#c94070", color: loading ? "#555" : "#fff", border: "none", cursor: loading ? "not-allowed" : "pointer", transition: "background .2s" }}
         >
-          {loading ? "Aguarde..." : "Continuar para pagamento"}
+          {loading ? "Aguarde..." : "Ir para o pagamento"}
         </button>
 
         <p style={{ fontSize: ".75rem", color: "var(--muted)", textAlign: "center", marginTop: 14 }}>
-          🔒 Pagamento processado com segurança pelo Sync Payments
+          Pagamento processado com segurança pelo Sync Payments
         </p>
       </div>
     </div>
@@ -870,8 +861,7 @@ function CheckoutModal({ period, onClose }: { period: "monthly" | "annual"; onCl
 }
 
 function Pricing() {
-  const [annual, setAnnual] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<"monthly" | "annual" | null>(null);
   const features = [
     "Dashboard completo com controle de caixa",
     "Gestão de pedidos (mesas, entregas e retiradas)",
@@ -880,69 +870,77 @@ function Pricing() {
     "Chamados de garçom pelo celular",
     "Cardápio digital com QR code",
     "Acompanhamento de pedido pelo cliente",
-    "Gestão de entregas",
-    "Gestão de retiradas",
+    "Gestão de entregas e retiradas",
     "Relatórios e análises completas",
     "Integração com WhatsApp",
-    "Configurações personalizadas",
     "Pedidos ilimitados",
     "Suporte prioritário",
   ];
+
+  function PlanCard({ type }: { type: "monthly" | "annual" }) {
+    const isAnnual = type === "annual";
+    return (
+      <div style={{ flex: 1, minWidth: 280, position: "relative", borderRadius: 24, border: `1.5px solid ${isAnnual ? "#c94070" : "#2a2a2e"}`, background: isAnnual ? "linear-gradient(145deg,#1e0d14,#1a1a1d)" : "#1a1a1d", padding: "40px 32px 32px", boxSizing: "border-box", boxShadow: isAnnual ? "0 0 60px rgba(201,64,112,.15)" : "none" }}>
+        {isAnnual && (
+          <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".65rem", fontWeight: 800, padding: "4px 14px", borderRadius: 99, whiteSpace: "nowrap", letterSpacing: ".06em" }}>
+            MAIS POPULAR · ECONOMIZE 45%
+          </div>
+        )}
+        <div style={{ fontSize: ".8rem", fontWeight: 700, color: isAnnual ? "#c94070" : "var(--muted)", marginBottom: 8, textTransform: "uppercase", letterSpacing: ".06em" }}>
+          Plano {isAnnual ? "Anual" : "Mensal"}
+        </div>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 4, marginBottom: 4 }}>
+          <span style={{ fontSize: "3rem", fontWeight: 900, color: "#f5f5f5", lineHeight: 1 }}>{isAnnual ? "R$ 97,90" : "R$ 179,90"}</span>
+          <span style={{ fontSize: ".85rem", color: "var(--muted)", paddingBottom: 6 }}>/mês</span>
+        </div>
+        <div style={{ fontSize: ".78rem", color: "var(--muted)", marginBottom: 20 }}>
+          {isAnnual ? "12 cobranças de R$ 97,90 via PIX" : "Cobrado mensalmente via PIX"}
+        </div>
+
+        <div style={{ fontSize: ".75rem", borderRadius: 10, padding: "10px 14px", marginBottom: 24, background: isAnnual ? "rgba(248,113,113,.08)" : "rgba(34,197,94,.08)", border: `1px solid ${isAnnual ? "rgba(248,113,113,.2)" : "rgba(34,197,94,.2)"}` }}>
+          <span style={{ fontWeight: 700, color: isAnnual ? "#f87171" : "#4ade80" }}>
+            {isAnnual ? "Fidelidade de 12 meses — sem cancelamento antecipado" : "Cancele quando quiser, sem multa"}
+          </span>
+          <div style={{ color: "var(--muted)", marginTop: 3, lineHeight: 1.5 }}>
+            {isAnnual
+              ? "Ao assinar, você se compromete com as 12 cobranças. O acesso continua pelo período completo."
+              : "Se cancelar, o acesso continua até o fim do mês pago. Sem burocracia."}
+          </div>
+        </div>
+
+        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "flex", flexDirection: "column", gap: 10 }}>
+          {features.map((f) => (
+            <li key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: ".85rem", color: "#d4d4d8" }}>
+              <span style={{ color: "#22c55e", fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
+            </li>
+          ))}
+        </ul>
+
+        <button
+          onClick={() => setModal(type)}
+          style={{ display: "block", width: "100%", textAlign: "center", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: isAnnual ? "#c94070" : "transparent", color: isAnnual ? "#fff" : "#c94070", border: isAnnual ? "none" : "2px solid #c94070", cursor: "pointer", transition: "all .2s" }}
+        >
+          Assinar agora
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
-      {modal && <CheckoutModal period={annual ? "annual" : "monthly"} onClose={() => setModal(false)} />}
+      {modal && <CheckoutModal period={modal} onClose={() => setModal(null)} />}
       <section id="precos" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
-        <div style={{ maxWidth: 860, marginInline: "auto", paddingInline: 24 }}>
+        <div style={{ maxWidth: 900, marginInline: "auto", paddingInline: 24 }}>
           <Reveal>
             <div style={{ textAlign: "center", marginBottom: 56 }}>
-              <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, marginBottom: 12 }}>Um plano. Tudo incluído.</h2>
-              <p style={{ color: "var(--muted)", marginBottom: 32, fontSize: "1.05rem" }}>Sem surpresas. Cancele quando quiser.</p>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#1a1a1d", borderRadius: 99, padding: "6px 6px 6px 16px", border: "1px solid #2a2a2e" }}>
-                <span style={{ fontSize: ".85rem", color: annual ? "#666" : "#f5f5f5", fontWeight: 600 }}>Mensal</span>
-                <button onClick={() => setAnnual(!annual)} style={{ width: 44, height: 24, borderRadius: 99, background: annual ? "#c94070" : "#2a2a2e", border: "none", cursor: "pointer", position: "relative", transition: "background .3s", flexShrink: 0 }}>
-                  <div style={{ position: "absolute", top: 3, left: annual ? 22 : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left .3s" }} />
-                </button>
-                <span style={{ fontSize: ".85rem", color: annual ? "#f5f5f5" : "#666", fontWeight: 600 }}>Anual</span>
-                {annual && <span style={{ fontSize: ".7rem", fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: "2px 8px" }}>Economize 45%</span>}
-              </div>
+              <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, marginBottom: 12 }}>Escolha seu plano</h2>
+              <p style={{ color: "var(--muted)", fontSize: "1.05rem" }}>Mesmo sistema completo. Escolha como prefere pagar.</p>
             </div>
           </Reveal>
-
           <Reveal delay={100}>
-            <div style={{ position: "relative", borderRadius: 24, border: "1px solid #c94070", background: "linear-gradient(145deg,#1e0d14,#1a1a1d)", padding: "48px 48px 40px", boxSizing: "border-box", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "start" }} className="pricing-card">
-              <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".7rem", fontWeight: 800, padding: "4px 18px", borderRadius: "0 0 12px 12px", whiteSpace: "nowrap" }}>
-                ACESSO COMPLETO
-              </div>
-
-              <div>
-                <div style={{ fontSize: ".9rem", fontWeight: 600, color: "var(--muted)", marginBottom: 10 }}>FoodNex</div>
-                <div style={{ marginBottom: 6 }}>
-                  <span style={{ fontSize: "3.6rem", fontWeight: 900, color: "#f5f5f5", lineHeight: 1 }}>
-                    {annual ? "R$ 97,90" : "R$ 179,90"}
-                  </span>
-                </div>
-                <div style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 24 }}>/mês{annual ? ", cobrado anualmente" : ""}</div>
-                {annual && (
-                  <div style={{ fontSize: ".82rem", color: "#22c55e", background: "#22c55e11", border: "1px solid #22c55e33", borderRadius: 10, padding: "8px 14px", marginBottom: 24 }}>
-                    Equivale a R$ 1.174,80/ano. Você economiza R$ 980,40
-                  </div>
-                )}
-                <button
-                  onClick={() => setModal(true)}
-                  style={{ display: "block", width: "100%", textAlign: "center", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: "#c94070", color: "#fff", border: "none", cursor: "pointer", marginBottom: 12 }}
-                >
-                  Assinar agora
-                </button>
-                <p style={{ fontSize: ".78rem", color: "var(--muted)", textAlign: "center" }}>7 dias grátis, sem cartão de crédito</p>
-              </div>
-
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 11 }}>
-                {features.map((f) => (
-                  <li key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: ".88rem", color: "#d4d4d8" }}>
-                    <span style={{ color: "#22c55e", fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
-                  </li>
-                ))}
-              </ul>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+              <PlanCard type="monthly" />
+              <PlanCard type="annual" />
             </div>
           </Reveal>
         </div>
@@ -954,7 +952,7 @@ function Pricing() {
 /* ═══════════════════════ FAQ ═══════════════════════ */
 const faqs = [
   { q: "Como funciona o período gratuito?", a: "7 dias sem cartão de crédito. Acesso completo a todos os recursos do plano Profissional." },
-  { q: "Posso cancelar a qualquer momento?", a: "Sim. Sem multa, sem fidelidade. Cancele direto no painel." },
+  { q: "Posso cancelar a qualquer momento?", a: "Depende do plano. No Mensal, cancele quando quiser sem multa. No Anual, você se compromete com 12 cobranças mensais e não é possível cancelar antes do fim do ciclo." },
   { q: "O sistema funciona no celular?", a: "Sim. Totalmente responsivo. Use no tablet da cozinha, no celular do garçom ou no computador do caixa." },
   { q: "Meu cardápio é acessível para os clientes?", a: "Sim. Gera um link único do seu cardápio digital que os clientes acessam pelo celular, com pedido direto." },
   { q: "Como os pedidos chegam na cozinha?", a: "Em tempo real. O sistema toca um alerta sonoro e exibe o pedido na tela da cozinha automaticamente." },
