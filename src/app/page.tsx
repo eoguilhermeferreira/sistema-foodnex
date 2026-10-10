@@ -791,53 +791,76 @@ function ExperienciaClienteSection() {
 /* ═══════════════════════ PRICING ═══════════════════════ */
 function Pricing() {
   const [annual, setAnnual] = useState(false);
-  const plans = [
-    { name: "Básico", price: annual ? 89 : 99, desc: "Para começar", features: ["1 ponto de venda", "Até 300 pedidos/mês", "Dashboard completo", "Cardápio digital", "Suporte por e-mail"], cta: "Começar grátis" },
-    { name: "Profissional", price: annual ? 179 : 199, desc: "Mais popular", features: ["3 pontos de venda", "Pedidos ilimitados", "Cozinha + Entregas + Retiradas", "Mesas + Garçom", "Relatórios avançados", "WhatsApp integrado", "Suporte prioritário"], cta: "Começar grátis", highlight: true },
-    { name: "Enterprise", price: annual ? 359 : 399, desc: "Para redes", features: ["Pontos de venda ilimitados", "Multi-loja", "API personalizada", "Gestor de conta dedicado", "SLA 99.9%"], cta: "Falar com vendas" },
+  const features = [
+    "Dashboard completo com controle de caixa",
+    "Gestão de pedidos (mesas, entregas e retiradas)",
+    "Tela da cozinha em tempo real",
+    "Gestão de mesas com status visual",
+    "Chamados de garçom pelo celular",
+    "Cardápio digital com QR code",
+    "Acompanhamento de pedido pelo cliente",
+    "Gestão de entregas",
+    "Gestão de retiradas",
+    "Relatórios e análises completas",
+    "Integração com WhatsApp",
+    "Configurações personalizadas",
+    "Pedidos ilimitados",
+    "Suporte prioritário",
   ];
   return (
     <section id="precos" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
-      <div style={{ maxWidth: 1100, marginInline: "auto", paddingInline: 24 }}>
+      <div style={{ maxWidth: 860, marginInline: "auto", paddingInline: 24 }}>
         <Reveal>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, marginBottom: 12 }}>Planos simples e transparentes</h2>
-            <p style={{ color: "var(--muted)", marginBottom: 28, fontSize: "1.05rem" }}>Sem surpresas. Cancele quando quiser.</p>
+            <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, marginBottom: 12 }}>Um plano. Tudo incluído.</h2>
+            <p style={{ color: "var(--muted)", marginBottom: 32, fontSize: "1.05rem" }}>Sem surpresas. Cancele quando quiser.</p>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#1a1a1d", borderRadius: 99, padding: "6px 6px 6px 16px", border: "1px solid #2a2a2e" }}>
               <span style={{ fontSize: ".85rem", color: annual ? "#666" : "#f5f5f5", fontWeight: 600 }}>Mensal</span>
               <button onClick={() => setAnnual(!annual)} style={{ width: 44, height: 24, borderRadius: 99, background: annual ? "#c94070" : "#2a2a2e", border: "none", cursor: "pointer", position: "relative", transition: "background .3s", flexShrink: 0 }}>
                 <div style={{ position: "absolute", top: 3, left: annual ? 22 : 3, width: 18, height: 18, borderRadius: "50%", background: "#fff", transition: "left .3s" }} />
               </button>
               <span style={{ fontSize: ".85rem", color: annual ? "#f5f5f5" : "#666", fontWeight: 600 }}>Anual</span>
-              {annual && <span style={{ fontSize: ".7rem", fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: "2px 8px" }}>-10%</span>}
+              {annual && <span style={{ fontSize: ".7rem", fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: "2px 8px" }}>Economize 45%</span>}
             </div>
           </div>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }} className="pricing-grid">
-          {plans.map((p, i) => (
-            <Reveal key={p.name} delay={i * 100}>
-              <div style={{ position: "relative", borderRadius: 20, border: p.highlight ? "1px solid #c94070" : "1px solid #2a2a2e", background: p.highlight ? "linear-gradient(145deg,#1e0d14,#1a1a1d)" : "#13131a", padding: 32, height: "100%", boxSizing: "border-box" }}>
-                {p.highlight && <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".7rem", fontWeight: 800, padding: "3px 14px", borderRadius: "0 0 10px 10px" }}>MAIS POPULAR</div>}
-                <div style={{ fontSize: ".85rem", fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>{p.name}</div>
-                <div style={{ marginBottom: 6 }}>
-                  <span style={{ fontSize: "2.6rem", fontWeight: 900, color: "#f5f5f5" }}>R${p.price}</span>
-                  <span style={{ color: "var(--muted)", fontSize: ".85rem" }}>/mês</span>
-                </div>
-                <p style={{ fontSize: ".82rem", color: "var(--muted)", marginBottom: 24 }}>{p.desc}</p>
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "flex", flexDirection: "column", gap: 10 }}>
-                  {p.features.map((f) => (
-                    <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: ".85rem", color: "#d4d4d8" }}>
-                      <span style={{ color: "#22c55e", flexShrink: 0 }}>✓</span> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/cadastro" style={{ display: "block", textAlign: "center", padding: "12px 0", borderRadius: 12, fontSize: ".9rem", fontWeight: 700, background: p.highlight ? "#c94070" : "transparent", color: p.highlight ? "#fff" : "var(--muted)", border: p.highlight ? "none" : "1px solid #2a2a2e", textDecoration: "none" }}>
-                  {p.cta}
-                </Link>
+
+        <Reveal delay={100}>
+          <div style={{ position: "relative", borderRadius: 24, border: "1px solid #c94070", background: "linear-gradient(145deg,#1e0d14,#1a1a1d)", padding: "48px 48px 40px", boxSizing: "border-box", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "start" }} className="pricing-card">
+            <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".7rem", fontWeight: 800, padding: "4px 18px", borderRadius: "0 0 12px 12px", whiteSpace: "nowrap" }}>
+              ACESSO COMPLETO
+            </div>
+
+            {/* Left: price */}
+            <div>
+              <div style={{ fontSize: ".9rem", fontWeight: 600, color: "var(--muted)", marginBottom: 10 }}>FoodNex</div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 4, marginBottom: 6 }}>
+                <span style={{ fontSize: "3.6rem", fontWeight: 900, color: "#f5f5f5", lineHeight: 1 }}>
+                  {annual ? "R$ 97,90" : "R$ 179,90"}
+                </span>
               </div>
-            </Reveal>
-          ))}
-        </div>
+              <div style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 24 }}>/mês{annual ? ", cobrado anualmente" : ""}</div>
+              {annual && (
+                <div style={{ fontSize: ".82rem", color: "#22c55e", background: "#22c55e11", border: "1px solid #22c55e33", borderRadius: 10, padding: "8px 14px", marginBottom: 24 }}>
+                  Equivale a R$ 1.174,80/ano — você economiza R$ 980,40
+                </div>
+              )}
+              <Link href="/cadastro" style={{ display: "block", textAlign: "center", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: "#c94070", color: "#fff", textDecoration: "none", marginBottom: 12 }}>
+                Começar agora
+              </Link>
+              <p style={{ fontSize: ".78rem", color: "var(--muted)", textAlign: "center" }}>7 dias grátis, sem cartão de crédito</p>
+            </div>
+
+            {/* Right: features */}
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 11 }}>
+              {features.map((f) => (
+                <li key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: ".88rem", color: "#d4d4d8" }}>
+                  <span style={{ color: "#22c55e", fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
