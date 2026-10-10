@@ -789,79 +789,23 @@ function ExperienciaClienteSection() {
 }
 
 /* ═══════════════════════ PRICING ═══════════════════════ */
-function CheckoutModal({ period, onClose }: { period: "monthly" | "annual"; onClose: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function handleCheckout() {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ period, method: "pix" }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.error ?? "Não foi possível gerar o link de pagamento.");
-      }
-    } catch {
-      setError("Erro de conexão. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
+async function goToCheckout(period: "monthly" | "annual", setLoading: (v: boolean) => void) {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ period }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+  } finally {
+    setLoading(false);
   }
-
-  return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "#13131a", border: "1px solid #2a2a2e", borderRadius: 20, padding: "36px 32px", maxWidth: 420, width: "100%", boxSizing: "border-box" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#f5f5f5", margin: 0 }}>Confirmar assinatura</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#666", fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
-        </div>
-
-        <p style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 24 }}>
-          Plano {period === "annual" ? "Anual — R$ 97,90/mês (12 cobranças)" : "Mensal — R$ 179,90/mês"}
-        </p>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderRadius: 14, border: "1.5px solid #c94070", background: "#1e0d14", marginBottom: 28 }}>
-          <span style={{ fontSize: 24, flexShrink: 0 }}>⚡</span>
-          <div>
-            <div style={{ fontSize: ".95rem", fontWeight: 700, color: "#f5f5f5" }}>PIX Automático</div>
-            <div style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 2 }}>Autorize uma vez, debita automático</div>
-          </div>
-          <span style={{ marginLeft: "auto", color: "#c94070", fontSize: 18 }}>✓</span>
-        </div>
-
-        {period === "annual" && (
-          <div style={{ fontSize: ".78rem", color: "#f87171", background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 20 }}>
-            Ao assinar o plano anual você se compromete com 12 cobranças mensais de R$ 97,90. Sem cancelamento antecipado.
-          </div>
-        )}
-
-        {error && <p style={{ fontSize: ".82rem", color: "#ef4444", marginBottom: 16, textAlign: "center" }}>{error}</p>}
-
-        <button
-          onClick={handleCheckout}
-          disabled={loading}
-          style={{ width: "100%", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: loading ? "#2a2a2e" : "#c94070", color: loading ? "#555" : "#fff", border: "none", cursor: loading ? "not-allowed" : "pointer", transition: "background .2s" }}
-        >
-          {loading ? "Aguarde..." : "Ir para o pagamento"}
-        </button>
-
-        <p style={{ fontSize: ".75rem", color: "var(--muted)", textAlign: "center", marginTop: 14 }}>
-          Pagamento processado com segurança pelo Sync Payments
-        </p>
-      </div>
-    </div>
-  );
 }
 
 function Pricing() {
-  const [modal, setModal] = useState<"monthly" | "annual" | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState<"monthly" | "annual" | null>(null);
   const features = [
     "Dashboard completo com controle de caixa",
     "Gestão de pedidos (mesas, entregas e retiradas)",
@@ -878,6 +822,7 @@ function Pricing() {
   ];
 
   function PlanCard({ type }: { type: "monthly" | "annual" }) {
+    const loading = loadingPlan === type;
     const isAnnual = type === "annual";
     return (
       <div style={{ flex: 1, minWidth: 280, position: "relative", borderRadius: 24, border: `1.5px solid ${isAnnual ? "#c94070" : "#2a2a2e"}`, background: isAnnual ? "linear-gradient(145deg,#1e0d14,#1a1a1d)" : "#1a1a1d", padding: "40px 32px 32px", boxSizing: "border-box", boxShadow: isAnnual ? "0 0 60px rgba(201,64,112,.15)" : "none" }}>
@@ -917,10 +862,11 @@ function Pricing() {
         </ul>
 
         <button
-          onClick={() => setModal(type)}
-          style={{ display: "block", width: "100%", textAlign: "center", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: isAnnual ? "#c94070" : "transparent", color: isAnnual ? "#fff" : "#c94070", border: isAnnual ? "none" : "2px solid #c94070", cursor: "pointer", transition: "all .2s" }}
+          onClick={() => { setLoadingPlan(type); goToCheckout(type, (v) => { if (!v) setLoadingPlan(null); }); }}
+          disabled={loading}
+          style={{ display: "block", width: "100%", textAlign: "center", padding: "14px 0", borderRadius: 14, fontSize: "1rem", fontWeight: 700, background: isAnnual ? "#c94070" : "transparent", color: isAnnual ? "#fff" : "#c94070", border: isAnnual ? "none" : "2px solid #c94070", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "all .2s" }}
         >
-          Assinar agora
+          {loading ? "Aguarde..." : "Assinar agora"}
         </button>
       </div>
     );
@@ -928,7 +874,6 @@ function Pricing() {
 
   return (
     <>
-      {modal && <CheckoutModal period={modal} onClose={() => setModal(null)} />}
       <section id="precos" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
         <div style={{ maxWidth: 900, marginInline: "auto", paddingInline: 24 }}>
           <Reveal>
