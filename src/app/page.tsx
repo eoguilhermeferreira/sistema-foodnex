@@ -806,7 +806,7 @@ function CheckoutModal({ period, onClose }: { period: "monthly" | "annual"; onCl
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setError("Não foi possível gerar o link de pagamento. Tente novamente.");
+        setError(data.error ?? "Não foi possível gerar o link de pagamento.");
       }
     } catch {
       setError("Erro de conexão. Tente novamente.");

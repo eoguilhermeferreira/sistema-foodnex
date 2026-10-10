@@ -67,9 +67,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: checkout }, { status: checkoutRes.status });
     }
 
-    const url = checkout.checkout_url ?? checkout.url ?? checkout.link ?? checkout.payment_url;
+    const url = checkout.checkout_url ?? checkout.url ?? checkout.link ?? checkout.payment_url ?? checkout.checkout_link;
     if (!url) {
-      return NextResponse.json({ error: "API não retornou URL de checkout", raw: checkout }, { status: 500 });
+      return NextResponse.json({ error: `API não retornou URL. Resposta: ${JSON.stringify(checkout)}` }, { status: 500 });
     }
 
     return NextResponse.json({ url });
