@@ -95,7 +95,7 @@ function PhoneCardapio({ scale = 1 }: { scale?: number }) {
             <span style={{ fontSize: 7.5 * s, fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: `1px ${7 * s}px`, display: "inline-block" }}>Aberto agora</span>
           </div>
         </div>
-        <div style={{ fontSize: 8 * s, color: "#888", marginBottom: 8 * s }}>Seg à Dom das 18h — 00h</div>
+        <div style={{ fontSize: 8 * s, color: "#888", marginBottom: 8 * s }}>Seg a Dom das 18h às 00h</div>
         {/* service pills */}
         <div style={{ display: "flex", gap: 4 * s, marginBottom: 10 * s, flexWrap: "wrap" }}>
           {["Entrega 30 min", "Retirada 15 min", "Mesa 20 min"].map((p) => (
@@ -214,10 +214,10 @@ function DashboardMockup() {
         <div style={{ background: "#1a1a2a", borderRadius: 8, padding: "8px 10px", border: "1px solid #2a2a3a" }}>
           <div style={{ fontSize: 8, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Atividade Recente</div>
           {[
-            { num: "#0041", desc: "Mesa 3 — 2x Pizza, 1x Suco", status: "Em preparo", sc: "#3b82f6" },
-            { num: "#0040", desc: "Entrega — Av. Brasil, 456", status: "Saiu entrega", sc: "#a855f7" },
-            { num: "#0039", desc: "Retirada — Pedro Alves", status: "Pronto", sc: "#22c55e" },
-            { num: "#0038", desc: "Mesa 7 — 1x X-Burguer, 2x Refri", status: "Aguardando", sc: "#f59e0b" },
+            { num: "#0041", desc: "Mesa 3: 2x Pizza, 1x Suco", status: "Em preparo", sc: "#3b82f6" },
+            { num: "#0040", desc: "Entrega: Av. Brasil, 456", status: "Saiu entrega", sc: "#a855f7" },
+            { num: "#0039", desc: "Retirada: Pedro Alves", status: "Pronto", sc: "#22c55e" },
+            { num: "#0038", desc: "Mesa 7: 1x X-Burguer, 2x Refri", status: "Aguardando", sc: "#f59e0b" },
           ].map((o) => (
             <div key={o.num} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 0", borderBottom: "1px solid #1e1e2e" }}>
               <span style={{ fontSize: 8, fontWeight: 700, color: "#c94070", minWidth: 30 }}>{o.num}</span>
@@ -235,7 +235,7 @@ function CozinhaMockup() {
   const cols = [
     { label: "Aguardando aceite", color: "#f59e0b", orders: [{ id: "#0043", name: "Mesa 5", items: "1x Margherita, 1x Frango" }] },
     { label: "Em preparo", color: "#3b82f6", orders: [{ id: "#0041", name: "Mesa 3", items: "2x X-Bacon, 1x Batata" }] },
-    { label: "Prontos", color: "#22c55e", orders: [{ id: "#0039", name: "Retirada — João", items: "1x Combo Frango" }] },
+    { label: "Prontos", color: "#22c55e", orders: [{ id: "#0039", name: "Retirada: João", items: "1x Combo Frango" }] },
     { label: "Concluídos hoje", color: "#555", orders: [] },
   ];
   return (
@@ -432,7 +432,7 @@ function RetiradasAdminMockup() {
 function EntregasMockup() {
   const orders = [
     { id: "#0041", name: "Carlos Mendes", addr: "Rua das Flores, 120", total: "R$68,00", status: "pronto" },
-    { id: "#0042", name: "Fernanda Cruz", addr: "Av. Brasil, 456 — Ap 3", total: "R$45,50", status: "saiu_entrega" },
+    { id: "#0042", name: "Fernanda Cruz", addr: "Av. Brasil, 456 Ap 3", total: "R$45,50", status: "saiu_entrega" },
     { id: "#0040", name: "Ricardo Lima", addr: "Rua XV de Novembro, 88", total: "R$92,00", status: "pronto" },
   ];
   return (
@@ -560,13 +560,13 @@ function WhatsAppPhone() {
                 <div>👤 Nome: Lucas Mendes</div>
                 <div>📞 Telefone: (11) 9 8765-4321</div>
                 <div>📦 Tipo: Entrega 🛵</div>
-                <div>📍 Rua das Flores, 128 — apto 3</div>
+                <div>📍 Rua das Flores, 128, apto 3</div>
                 <div>🕐 Horário: 19:42</div>
               </div>
               <div style={{ fontSize: 9, color: "#d1d7db", fontWeight: 700, marginTop: 6, borderTop: "1px solid #2a3942", paddingTop: 5 }}>🍽️ PEDIDO</div>
               <div style={{ fontSize: 8.5, color: "#d1d7db", lineHeight: 1.6, marginTop: 3 }}>
-                <div>▪ 1x Pizza Calabresa G — R$ 55,00</div>
-                <div>▪ 1x Coca-Cola 2L — R$ 14,00</div>
+                <div>▪ 1x Pizza Calabresa G: R$ 55,00</div>
+                <div>▪ 1x Coca-Cola 2L: R$ 14,00</div>
               </div>
               <div style={{ fontSize: 8.5, color: "#d1d7db", marginTop: 6, borderTop: "1px solid #2a3942", paddingTop: 5 }}>
                 <div>Subtotal: <b>R$ 69,00</b></div>
@@ -744,7 +744,7 @@ function ExperienciaClienteSection() {
               Experiência completa para seus clientes
             </h2>
             <p style={{ fontSize: "1rem", color: "var(--muted)", maxWidth: 560, marginInline: "auto", lineHeight: 1.7 }}>
-              Seus clientes acessam o cardápio, fazem o pedido e acompanham tudo em tempo real — direto pelo celular, sem precisar baixar nenhum aplicativo.
+              Seus clientes acessam o cardápio, fazem o pedido e acompanham tudo em tempo real, direto pelo celular, sem precisar baixar nenhum aplicativo.
             </p>
           </div>
 
@@ -753,14 +753,14 @@ function ExperienciaClienteSection() {
             {/* Phone 1: Cardápio */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}>
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <PhoneFrame>
-                  <PhoneCardapio />
+                <PhoneFrame scale={0.82}>
+                  <PhoneCardapio scale={0.82} />
                 </PhoneFrame>
               </div>
               <div style={{ textAlign: "center", maxWidth: 280 }}>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#f5f5f5", marginBottom: 8 }}>Cardápio Digital</h3>
                 <p style={{ fontSize: ".88rem", color: "var(--muted)", lineHeight: 1.65 }}>
-                  O cliente escaneia o QR code da mesa, da loja ou acessa o link e vê todo o cardápio com fotos, descrições e preços. Faz o pedido direto — sem precisar falar com ninguém.
+                  O cliente escaneia o QR code da mesa, da loja ou acessa o link e vê todo o cardápio com fotos, descrições e preços. Faz o pedido direto, sem precisar falar com ninguém.
                 </p>
               </div>
             </div>
@@ -768,14 +768,14 @@ function ExperienciaClienteSection() {
             {/* Phone 2: Order Tracking */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}>
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <PhoneFrame>
-                  <PhoneTracking />
+                <PhoneFrame scale={0.82}>
+                  <PhoneTracking scale={0.82} />
                 </PhoneFrame>
               </div>
               <div style={{ textAlign: "center", maxWidth: 280 }}>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#f5f5f5", marginBottom: 8 }}>Acompanhamento em Tempo Real</h3>
                 <p style={{ fontSize: ".88rem", color: "var(--muted)", lineHeight: 1.65 }}>
-                  Após fazer o pedido, o cliente acompanha cada etapa — de "pedido recebido" até "pronto para retirar" — sem precisar ligar para o restaurante.
+                  Após fazer o pedido, o cliente acompanha cada etapa, de "pedido recebido" até "pronto para retirar", sem precisar ligar para o restaurante.
                 </p>
               </div>
             </div>
@@ -939,7 +939,7 @@ export default function Home() {
               <div style={{ marginBottom: 32, animation: "float 6s ease-in-out infinite" }}>
                 <Image
                   src="/logo.png"
-                  alt="FoodNex — Gestão Inteligente de Pedidos"
+                  alt="FoodNex: Gestão Inteligente de Pedidos"
                   width={280}
                   height={280}
                   priority
@@ -1005,7 +1005,7 @@ export default function Home() {
           id="dashboard"
           label="Dashboard"
           title="Visão completa do seu negócio em tempo real"
-          desc="Acompanhe faturamento, quantidade de pedidos e ticket médio do dia. Veja todos os pedidos ativos — mesas, entregas e retiradas — num único painel. Controle de caixa integrado com histórico de datas anteriores."
+          desc="Acompanhe faturamento, quantidade de pedidos e ticket médio do dia. Veja todos os pedidos ativos (mesas, entregas e retiradas) num único painel. Controle de caixa integrado com histórico de datas anteriores."
           mockup={<DashboardMockup />}
         />
 
@@ -1022,7 +1022,7 @@ export default function Home() {
           id="mesas"
           label="Mesas"
           title="Gestão de mesas com status em tempo real"
-          desc="Veja todas as mesas do restaurante de um olhar — livres em verde e ocupadas em vermelho. Abra a comanda de cada mesa, registre o pagamento por dinheiro, PIX, cartão de crédito ou débito, e libere a mesa com um clique."
+          desc="Veja todas as mesas do restaurante de um olhar, livres em verde e ocupadas em vermelho. Abra a comanda de cada mesa, registre o pagamento por dinheiro, PIX, cartão de crédito ou débito, e libere a mesa com um clique."
           mockup={<MesasMockup />}
         />
 
@@ -1030,7 +1030,7 @@ export default function Home() {
           id="garcom"
           label="Garçom"
           title="Chamados de garçom direto no celular"
-          desc="O cliente escaneia o QR da mesa e chama o garçom pelo celular — sem precisar apertar botão físico. O chamado aparece instantaneamente na tela do garçom com nome, mesa e horário. Atenda e conclua com dois toques."
+          desc="O cliente escaneia o QR da mesa e chama o garçom pelo celular, sem precisar apertar botão físico. O chamado aparece instantaneamente na tela do garçom com nome, mesa e horário. Atenda e conclua com dois toques."
           mockup={<GarcomMockup />}
           reverse
         />
@@ -1064,7 +1064,7 @@ export default function Home() {
           id="relatorios"
           label="Relatórios"
           title="Dados completos para decisões mais inteligentes"
-          desc="Filtre por período e veja total faturado, número de pedidos e ticket médio. Breakdown completo por forma de pagamento e por tipo de pedido — mesa, entrega ou retirada. Imprima ou exporte em segundos."
+          desc="Filtre por período e veja total faturado, número de pedidos e ticket médio. Breakdown completo por forma de pagamento e por tipo de pedido: mesa, entrega ou retirada. Imprima ou exporte em segundos."
           mockup={<RelatoriosMockup />}
           reverse
         />
