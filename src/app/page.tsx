@@ -19,7 +19,7 @@ function useReveal() {
 }
 
 /* ── Animated counter ── */
-function Counter({ to, prefix = "", suffix = "" }: { to: number; prefix?: string; suffix?: string }) {
+function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const [val, setVal] = useState(0);
   const { ref, visible } = useReveal();
   useEffect(() => {
@@ -32,7 +32,7 @@ function Counter({ to, prefix = "", suffix = "" }: { to: number; prefix?: string
     }, 16);
     return () => clearInterval(id);
   }, [visible, to]);
-  return <span ref={ref}>{prefix}{val.toLocaleString("pt-BR")}{suffix}</span>;
+  return <span ref={ref}>{val.toLocaleString("pt-BR")}{suffix}</span>;
 }
 
 /* ── Section wrapper with reveal ── */
@@ -49,7 +49,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-/* ═══════════════════════ BROWSER FRAME ═══════════════════════ */
+/* ═══════════════════════ FRAMES ═══════════════════════ */
 function BrowserFrame({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ background: "#13131a", borderRadius: 16, overflow: "hidden", border: "1px solid #2a2a3a", boxShadow: "0 24px 80px rgba(0,0,0,.7)" }}>
@@ -64,18 +64,112 @@ function BrowserFrame({ title, children }: { title: string; children: React.Reac
   );
 }
 
-/* ═══════════════════════ PHONE FRAME ═══════════════════════ */
-function PhoneFrame({ children }: { children: React.ReactNode }) {
+function PhoneFrame({ children, scale = 1 }: { children: React.ReactNode; scale?: number }) {
   return (
-    <div style={{ display: "flex", justifyContent: "center" }}>
-      <div style={{ width: 240, background: "#0d0d0d", borderRadius: 36, border: "3px solid #2a2a2a", overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,.9), 0 0 0 1px #1a1a1a", position: "relative" }}>
-        {/* status bar */}
-        <div style={{ height: 32, background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 18px", position: "relative" }}>
-          <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>00:09</span>
-          <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 70, height: 20, background: "#0d0d0d", borderRadius: "0 0 14px 14px", border: "2px solid #1a1a1a", borderTop: "none" }} />
-          <span style={{ fontSize: 8, color: "#fff" }}>▌▌▌ 4G</span>
+    <div style={{ width: 220 * scale, background: "#0d0d0d", borderRadius: 36 * scale, border: `3px solid #2a2a2a`, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,.9), 0 0 0 1px #1a1a1a", position: "relative" }}>
+      <div style={{ height: 30 * scale, background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "space-between", padding: `0 ${18 * scale}px`, position: "relative" }}>
+        <span style={{ fontSize: 9 * scale, color: "#fff", fontWeight: 700 }}>00:09</span>
+        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 65 * scale, height: 18 * scale, background: "#0d0d0d", borderRadius: `0 0 ${14 * scale}px ${14 * scale}px`, border: `2px solid #1a1a1a`, borderTop: "none" }} />
+        <span style={{ fontSize: 8 * scale, color: "#fff" }}>▌▌▌ 4G</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/* ═══════════════════════ PHONE CONTENT: CARDÁPIO DO CLIENTE ═══════════════════════ */
+function PhoneCardapio({ scale = 1 }: { scale?: number }) {
+  const s = scale;
+  return (
+    <div style={{ background: "#0d0d14", minHeight: 480 * s }}>
+      {/* banner */}
+      <div style={{ height: 80 * s, background: "linear-gradient(135deg, #7c2d12, #c94070)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: 10 * s, fontWeight: 700, color: "rgba(255,255,255,.7)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Promoção do Fim de Semana</span>
+      </div>
+      <div style={{ padding: `${10 * s}px ${12 * s}px ${8 * s}px` }}>
+        {/* store info */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 * s, marginBottom: 6 * s }}>
+          <div style={{ width: 38 * s, height: 38 * s, background: "#1a1a2a", borderRadius: 10 * s, border: "1px solid #2a2a3a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 * s, flexShrink: 0 }}>🍕</div>
+          <div>
+            <div style={{ fontSize: 11 * s, fontWeight: 900, color: "#f5f5f5" }}>PIZZA NOVA</div>
+            <span style={{ fontSize: 7.5 * s, fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: `1px ${7 * s}px`, display: "inline-block" }}>Aberto agora</span>
+          </div>
         </div>
-        {children}
+        <div style={{ fontSize: 8 * s, color: "#888", marginBottom: 8 * s }}>Seg à Dom das 18h — 00h</div>
+        {/* service pills */}
+        <div style={{ display: "flex", gap: 4 * s, marginBottom: 10 * s, flexWrap: "wrap" }}>
+          {["Entrega 30 min", "Retirada 15 min", "Mesa 20 min"].map((p) => (
+            <span key={p} style={{ fontSize: 7.5 * s, color: "#aaa", background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 99, padding: `2px ${7 * s}px` }}>{p}</span>
+          ))}
+        </div>
+        {/* category tabs */}
+        <div style={{ display: "flex", gap: 5 * s, marginBottom: 10 * s, overflow: "hidden" }}>
+          {["Pizzas", "Hambúrgueres", "Bebidas"].map((c, i) => (
+            <span key={c} style={{ fontSize: 9 * s, fontWeight: 700, whiteSpace: "nowrap", padding: `4px ${10 * s}px`, borderRadius: 99, background: i === 0 ? "#c94070" : "#1a1a2a", color: i === 0 ? "#fff" : "#888", border: i === 0 ? "none" : "1px solid #2a2a3a" }}>{c}</span>
+          ))}
+        </div>
+        {/* products */}
+        {[
+          { name: "Pizza Margherita", desc: "Molho, mozzarella, manjericão", price: "R$ 32,00" },
+          { name: "Pizza Frango", desc: "Frango desfiado, catupiry, orégano", price: "R$ 38,00" },
+        ].map((p) => (
+          <div key={p.name} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10 * s, padding: 10 * s, marginBottom: 6 * s, display: "flex", gap: 8 * s, alignItems: "center" }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 10 * s, fontWeight: 700, color: "#f5f5f5" }}>{p.name}</div>
+              <div style={{ fontSize: 8 * s, color: "#888", marginTop: 2 * s }}>{p.desc}</div>
+              <div style={{ fontSize: 11 * s, fontWeight: 800, color: "#c94070", marginTop: 4 * s }}>{p.price}</div>
+            </div>
+            <div style={{ width: 44 * s, height: 44 * s, background: "#2a2a3a", borderRadius: 8 * s, flexShrink: 0 }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════ PHONE CONTENT: ACOMPANHAMENTO DO PEDIDO ═══════════════════════ */
+function PhoneTracking({ scale = 1 }: { scale?: number }) {
+  const s = scale;
+  return (
+    <div style={{ background: "#0d0d14", minHeight: 480 * s, padding: 14 * s }}>
+      <div style={{ textAlign: "center", marginBottom: 20 * s }}>
+        <div style={{ width: 44 * s, height: 44 * s, background: "#c9407022", border: "1px solid #c9407044", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", marginInline: "auto", marginBottom: 8 * s, fontSize: 20 * s }}>🕐</div>
+        <div style={{ fontSize: 8.5 * s, color: "#888" }}>Pedido #0015 · guilherme ferreira</div>
+        <div style={{ fontSize: 13 * s, fontWeight: 900, color: "#f5f5f5", margin: `4px 0 2px` }}>Pedido recebido</div>
+        <div style={{ fontSize: 8.5 * s, color: "#888" }}>Aguardando o restaurante confirmar</div>
+      </div>
+      {/* Timeline */}
+      <div style={{ position: "relative", paddingLeft: 28 * s }}>
+        {[
+          { step: 1, label: "Pedido recebido", sub: "Aguardando confirmar", active: true },
+          { step: 2, label: "Em preparo", sub: "", active: false },
+          { step: 3, label: "Pronto para retirada", sub: "", active: false },
+          { step: 4, label: "Retirado!", sub: "", active: false },
+        ].map((item, i) => (
+          <div key={item.step} style={{ display: "flex", alignItems: "flex-start", gap: 10 * s, marginBottom: i < 3 ? 20 * s : 0, position: "relative" }}>
+            {i < 3 && <div style={{ position: "absolute", left: -20 * s, top: 16 * s, width: 2, height: 24 * s, background: "#2a2a3a" }} />}
+            <div style={{ position: "absolute", left: -26 * s, top: 0, width: 14 * s, height: 14 * s, borderRadius: "50%", background: item.active ? "#c94070" : "#2a2a3a", border: item.active ? `2px solid #e0507f` : "2px solid #3a3a4a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontSize: 7.5 * s, fontWeight: 900, color: item.active ? "#fff" : "#666" }}>{item.step}</span>
+            </div>
+            <div>
+              <div style={{ fontSize: 10 * s, fontWeight: 700, color: item.active ? "#f5f5f5" : "#555" }}>{item.label}</div>
+              {item.sub && <div style={{ fontSize: 8 * s, color: "#888", marginTop: 1 }}>{item.sub}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Order summary */}
+      <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10 * s, padding: `${10 * s}px ${12 * s}px`, marginTop: 18 * s }}>
+        <div style={{ fontSize: 7.5 * s, fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 * s }}>Resumo do Pedido</div>
+        <div style={{ fontSize: 9 * s, color: "#ccc" }}>Lanches</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 * s, marginBottom: 6 * s }}>
+          <span style={{ fontSize: 10 * s, fontWeight: 700, color: "#f5f5f5" }}>1x X-Salada</span>
+          <span style={{ fontSize: 9 * s, color: "#ccc" }}>R$ 20,00</span>
+        </div>
+        <div style={{ borderTop: "1px solid #2a2a3a", paddingTop: 6 * s, display: "flex", justifyContent: "space-between" }}>
+          <span style={{ fontSize: 9 * s, fontWeight: 700, color: "#f5f5f5" }}>Total</span>
+          <span style={{ fontSize: 9 * s, fontWeight: 900, color: "#f5f5f5" }}>R$ 20,00</span>
+        </div>
       </div>
     </div>
   );
@@ -87,14 +181,12 @@ function DashboardMockup() {
   return (
     <BrowserFrame title="Dashboard · FoodNex">
       <div style={{ padding: 12, fontSize: 10 }}>
-        {/* Caixa Aberto banner */}
         <div style={{ background: "#16a34a22", border: "1px solid #16a34a44", borderRadius: 8, padding: "6px 10px", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a", animation: "glow 2s ease-in-out infinite", flexShrink: 0 }} />
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a", flexShrink: 0 }} />
           <span style={{ fontSize: 8.5, fontWeight: 700, color: "#4ade80" }}>Caixa Aberto</span>
           <span style={{ fontSize: 8, color: "#86efac", marginLeft: "auto" }}>Aberto às 11:00</span>
           <button style={{ fontSize: 7.5, fontWeight: 700, color: "#ef4444", background: "#ef444411", border: "1px solid #ef444433", borderRadius: 5, padding: "2px 7px", cursor: "pointer" }}>Fechar Caixa</button>
         </div>
-        {/* stat cards row 1 */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 6 }}>
           {[
             { val: "23", lbl: "Pedidos no Caixa", color: "#c94070" },
@@ -107,7 +199,6 @@ function DashboardMockup() {
             </div>
           ))}
         </div>
-        {/* stat cards row 2 */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
           {[
             { val: "5", lbl: "Entregas", color: "#a855f7" },
@@ -120,9 +211,8 @@ function DashboardMockup() {
             </div>
           ))}
         </div>
-        {/* Atividade Recente */}
         <div style={{ background: "#1a1a2a", borderRadius: 8, padding: "8px 10px", border: "1px solid #2a2a3a" }}>
-          <div style={{ fontSize: 8, fontWeight: 700, color: "#aaa", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Atividade Recente</div>
+          <div style={{ fontSize: 8, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Atividade Recente</div>
           {[
             { num: "#0041", desc: "Mesa 3 — 2x Pizza, 1x Suco", status: "Em preparo", sc: "#3b82f6" },
             { num: "#0040", desc: "Entrega — Av. Brasil, 456", status: "Saiu entrega", sc: "#a855f7" },
@@ -143,20 +233,14 @@ function DashboardMockup() {
 
 function CozinhaMockup() {
   const cols = [
-    { label: "Aguardando aceite", color: "#f59e0b", orders: [
-      { id: "#0043", name: "Mesa 5", items: "1x Margherita, 1x Frango" },
-    ]},
-    { label: "Em preparo", color: "#3b82f6", orders: [
-      { id: "#0041", name: "Mesa 3", items: "2x X-Bacon, 1x Batata" },
-    ]},
-    { label: "Prontos", color: "#22c55e", orders: [
-      { id: "#0039", name: "Retirada — João", items: "1x Combo Frango" },
-    ]},
+    { label: "Aguardando aceite", color: "#f59e0b", orders: [{ id: "#0043", name: "Mesa 5", items: "1x Margherita, 1x Frango" }] },
+    { label: "Em preparo", color: "#3b82f6", orders: [{ id: "#0041", name: "Mesa 3", items: "2x X-Bacon, 1x Batata" }] },
+    { label: "Prontos", color: "#22c55e", orders: [{ id: "#0039", name: "Retirada — João", items: "1x Combo Frango" }] },
     { label: "Concluídos hoje", color: "#555", orders: [] },
   ];
   return (
     <BrowserFrame title="Cozinha · FoodNex">
-      <div style={{ padding: "10px 10px 10px", fontSize: 9 }}>
+      <div style={{ padding: "10px", fontSize: 9 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6 }}>
           {cols.map((col) => (
             <div key={col.label}>
@@ -206,18 +290,16 @@ function MesasMockup() {
     livre:   { border: "#22c55e55", bg: "#22c55e0d", badge: "#22c55e22", lbl: "#22c55e" },
     ocupada: { border: "#ef444455", bg: "#ef44440d", badge: "#ef444422", lbl: "#ef4444" },
   };
-  const livres = tables.filter(t => t.status === "livre").length;
-  const ocupadas = tables.filter(t => t.status === "ocupada").length;
   return (
     <BrowserFrame title="Mesas · FoodNex">
       <div style={{ padding: 12 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10, fontSize: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
           <div style={{ background: "#22c55e11", border: "1px solid #22c55e33", borderRadius: 8, padding: "8px", textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 900, color: "#22c55e" }}>{livres}</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "#22c55e" }}>3</div>
             <div style={{ color: "#86efac", fontSize: 8, marginTop: 1 }}>Livres</div>
           </div>
           <div style={{ background: "#ef444411", border: "1px solid #ef444433", borderRadius: 8, padding: "8px", textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 900, color: "#ef4444" }}>{ocupadas}</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "#ef4444" }}>5</div>
             <div style={{ color: "#fca5a5", fontSize: 8, marginTop: 1 }}>Ocupadas</div>
           </div>
         </div>
@@ -240,223 +322,110 @@ function MesasMockup() {
 
 function GarcomMockup() {
   return (
-    <PhoneFrame>
-      <div style={{ background: "#0d0d14", minHeight: 440, padding: 14 }}>
-        {/* Store header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
-          <div style={{ width: 40, height: 40, background: "#1a1a2a", borderRadius: 10, border: "1px solid #2a2a3a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🍕</div>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 900, color: "#f5f5f5", letterSpacing: "0.03em" }}>PIZZA NOVA</div>
-            <div style={{ fontSize: 9, color: "#888" }}>Painel do Garçom</div>
-          </div>
-        </div>
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
-          <div style={{ background: "#ef444411", border: "1px solid #ef444440", borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: "#ef4444", marginBottom: 4 }}>Aguardando</div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: "#ef4444", lineHeight: 1 }}>1</div>
-          </div>
-          <div style={{ background: "#f59e0b11", border: "1px solid #f59e0b40", borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: "#f59e0b", marginBottom: 4 }}>Em atendimento</div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: "#f59e0b", lineHeight: 1 }}>0</div>
-          </div>
-        </div>
-        {/* Call card */}
-        <div style={{ background: "#ef444411", border: "1px solid #ef444440", borderRadius: 12, padding: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: "#f5f5f5" }}>Mesa 4</div>
-              <div style={{ fontSize: 10, color: "#888", marginTop: 2 }}>Carlos · 00:08</div>
-            </div>
-            <button style={{ background: "#c94070", border: "none", borderRadius: 10, padding: "9px 14px", fontSize: 11, fontWeight: 800, color: "#fff", cursor: "pointer" }}>Atender</button>
-          </div>
-        </div>
-      </div>
-    </PhoneFrame>
-  );
-}
-
-function CardapioMockup() {
-  const [tab, setTab] = useState<"admin" | "cliente">("admin");
-  return (
-    <div>
-      {/* view toggle */}
-      <div style={{ display: "flex", gap: 4, background: "#1a1a2a", borderRadius: 10, padding: 3, marginBottom: 10, border: "1px solid #2a2a3a" }}>
-        {(["admin", "cliente"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "6px 0", borderRadius: 8, fontSize: 10, fontWeight: 700, border: "none", cursor: "pointer", background: tab === t ? "#c94070" : "transparent", color: tab === t ? "#fff" : "#888", transition: "all .2s" }}>
-            {t === "admin" ? "Painel Admin" : "Cardápio do Cliente"}
-          </button>
-        ))}
-      </div>
-
-      {tab === "admin" ? (
-        <BrowserFrame title="Cardápio · FoodNex">
-          <div style={{ padding: 12, fontSize: 10 }}>
-            {/* link bar */}
-            <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "6px 10px", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 7.5, color: "#888", marginBottom: 2 }}>Link público do cardápio</div>
-                <div style={{ fontSize: 8.5, color: "#c94070", fontFamily: "monospace" }}>foodnex.app/pizzanova</div>
-              </div>
-              <button style={{ background: "#c94070", border: "none", borderRadius: 6, padding: "4px 8px", fontSize: 8, fontWeight: 700, color: "#fff", cursor: "pointer" }}>Copiar</button>
-            </div>
-            {/* tabs */}
-            <div style={{ display: "flex", gap: 3, background: "#1a1a2a", borderRadius: 8, padding: 3, marginBottom: 10 }}>
-              {["Categorias", "Adicionais", "Produtos", "Disponibilidade"].map((t, i) => (
-                <div key={t} style={{ flex: 1, textAlign: "center", padding: "4px 0", borderRadius: 6, fontSize: 7.5, fontWeight: 600, background: i === 0 ? "#13131a" : "transparent", color: i === 0 ? "#f5f5f5" : "#888" }}>{t}</div>
-              ))}
-            </div>
-            {/* category cards */}
-            {[
-              { name: "Pizzas", items: 12 },
-              { name: "Hambúrgueres", items: 7 },
-              { name: "Bebidas", items: 10 },
-            ].map((cat) => (
-              <div key={cat.name} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "7px 10px", marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>{cat.name}</div>
-                  <div style={{ fontSize: 7.5, color: "#888" }}>{cat.items} produtos</div>
-                </div>
-                <button style={{ background: "#2a2a3a", border: "1px solid #3a3a4a", borderRadius: 5, padding: "2px 7px", fontSize: 7.5, color: "#aaa", cursor: "pointer" }}>Editar</button>
-              </div>
-            ))}
-          </div>
-        </BrowserFrame>
-      ) : (
-        <PhoneFrame>
-          <div style={{ background: "#0d0d14", minHeight: 480 }}>
-            {/* banner placeholder */}
-            <div style={{ height: 80, background: "linear-gradient(135deg, #7c2d12, #c94070)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.6)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Promoção do Fim de Semana</span>
-            </div>
-            {/* store info */}
-            <div style={{ padding: "10px 12px 8px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <div style={{ width: 38, height: 38, background: "#1a1a2a", borderRadius: 10, border: "1px solid #2a2a3a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🍕</div>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 900, color: "#f5f5f5" }}>PIZZA NOVA</div>
-                  <span style={{ fontSize: 7.5, fontWeight: 700, color: "#22c55e", background: "#22c55e22", borderRadius: 99, padding: "1px 7px", display: "inline-block" }}>Aberto agora</span>
-                </div>
-              </div>
-              <div style={{ fontSize: 8, color: "#888", marginBottom: 8 }}>Seg à Dom das 18h — 00h</div>
-              {/* service pills */}
-              <div style={{ display: "flex", gap: 4, marginBottom: 10, flexWrap: "wrap" }}>
-                {["Entrega 30 min", "Retirada 15 min", "Mesa 20 min"].map((p) => (
-                  <span key={p} style={{ fontSize: 7.5, color: "#aaa", background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 99, padding: "2px 7px" }}>{p}</span>
-                ))}
-              </div>
-              {/* category tabs */}
-              <div style={{ display: "flex", gap: 5, marginBottom: 10, overflowX: "auto" }}>
-                {["Pizzas", "Hambúrgueres", "Bebidas", "Sobremesas"].map((c, i) => (
-                  <span key={c} style={{ fontSize: 9, fontWeight: 700, whiteSpace: "nowrap", padding: "4px 10px", borderRadius: 99, background: i === 0 ? "#c94070" : "#1a1a2a", color: i === 0 ? "#fff" : "#888", border: i === 0 ? "none" : "1px solid #2a2a3a" }}>{c}</span>
-                ))}
-              </div>
-              {/* products */}
-              {[
-                { name: "Pizza Margherita", desc: "Molho, mozzarella, manjericão", price: "R$ 32,00" },
-                { name: "Pizza Frango c/ Catupiry", desc: "Frango desfiado, catupiry, orégano", price: "R$ 38,00" },
-              ].map((p) => (
-                <div key={p.name} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: 10, marginBottom: 6, display: "flex", gap: 8, alignItems: "center" }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#f5f5f5" }}>{p.name}</div>
-                    <div style={{ fontSize: 8, color: "#888", marginTop: 2 }}>{p.desc}</div>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: "#c94070", marginTop: 4 }}>{p.price}</div>
-                  </div>
-                  <div style={{ width: 44, height: 44, background: "#2a2a3a", borderRadius: 8, flexShrink: 0 }} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </PhoneFrame>
-      )}
-    </div>
-  );
-}
-
-function RetiradasMockup() {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 16, alignItems: "start" }}>
-      {/* Admin view */}
-      <BrowserFrame title="Retiradas · FoodNex">
-        <div style={{ padding: 12, fontSize: 10 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
-            <div style={{ background: "#f59e0b11", border: "1px solid #f59e0b33", borderRadius: 8, padding: 8, textAlign: "center" }}>
-              <div style={{ fontSize: 16, fontWeight: 900, color: "#f59e0b" }}>3</div>
-              <div style={{ fontSize: 7.5, color: "#f59e0b99" }}>Aguardando retirada</div>
-            </div>
-            <div style={{ background: "#22c55e11", border: "1px solid #22c55e33", borderRadius: 8, padding: 8, textAlign: "center" }}>
-              <div style={{ fontSize: 16, fontWeight: 900, color: "#22c55e" }}>11</div>
-              <div style={{ fontSize: 7.5, color: "#22c55e99" }}>Concluídas hoje</div>
-            </div>
-          </div>
-          <input style={{ width: "100%", background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 6, padding: "4px 8px", fontSize: 8, color: "#888", boxSizing: "border-box", marginBottom: 8, outline: "none" }} placeholder="Buscar por cliente..." readOnly />
-          {[
-            { id: "#0043", name: "Pedro Alves", items: "1x Combo Frango", total: "R$28,00", status: "pronto" },
-            { id: "#0041", name: "Carla Souza", items: "2x X-Bacon", total: "R$52,00", status: "pronto" },
-            { id: "#0038", name: "Lucas Ferreira", items: "1x Pizza M, 1x Suco", total: "R$45,00", status: "pronto" },
-          ].map((o) => (
-            <div key={o.id} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "7px 8px", marginBottom: 5 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                <span style={{ fontSize: 8, fontWeight: 800, color: "#c94070" }}>{o.id}</span>
-                <span style={{ fontSize: 8.5, fontWeight: 700, color: "#e5e5e5" }}>{o.name}</span>
-                <span style={{ marginLeft: "auto", fontSize: 7, fontWeight: 700, color: "#f59e0b", background: "#f59e0b22", borderRadius: 99, padding: "1px 5px" }}>Aguardando</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 7.5, color: "#888" }}>{o.items} · {o.total}</span>
-                <button style={{ background: "#c9407022", border: "1px solid #c9407055", borderRadius: 5, padding: "2px 7px", fontSize: 7.5, fontWeight: 700, color: "#c94070", cursor: "pointer" }}>Entregar →</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </BrowserFrame>
-
-      {/* Client tracking phone */}
+    <div style={{ display: "flex", justifyContent: "center" }}>
       <PhoneFrame>
-        <div style={{ background: "#0d0d14", minHeight: 420, padding: 14 }}>
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <div style={{ width: 44, height: 44, background: "#c9407022", border: "1px solid #c9407044", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", marginInline: "auto", marginBottom: 8 }}>
-              <span style={{ fontSize: 20 }}>🕐</span>
+        <div style={{ background: "#0d0d14", minHeight: 440, padding: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+            <div style={{ width: 40, height: 40, background: "#1a1a2a", borderRadius: 10, border: "1px solid #2a2a3a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🍕</div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: "#f5f5f5", letterSpacing: "0.03em" }}>PIZZA NOVA</div>
+              <div style={{ fontSize: 9, color: "#888" }}>Painel do Garçom</div>
             </div>
-            <div style={{ fontSize: 8.5, color: "#888" }}>Pedido #0043 · Pedro Alves</div>
-            <div style={{ fontSize: 13, fontWeight: 900, color: "#f5f5f5", margin: "4px 0 2px" }}>Pedido recebido</div>
-            <div style={{ fontSize: 8.5, color: "#888" }}>Aguardando o restaurante confirmar</div>
           </div>
-          {/* Timeline */}
-          <div style={{ position: "relative", paddingLeft: 28 }}>
-            {[
-              { step: 1, label: "Pedido recebido", sub: "Aguardando confirmar", active: true },
-              { step: 2, label: "Em preparo", sub: "", active: false },
-              { step: 3, label: "Pronto para retirada", sub: "", active: false },
-              { step: 4, label: "Retirado!", sub: "", active: false },
-            ].map((s, i) => (
-              <div key={s.step} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: i < 3 ? 20 : 0, position: "relative" }}>
-                {/* connector line */}
-                {i < 3 && <div style={{ position: "absolute", left: -20, top: 16, width: 2, height: 24, background: "#2a2a3a" }} />}
-                <div style={{ position: "absolute", left: -26, top: 0, width: 14, height: 14, borderRadius: "50%", background: s.active ? "#c94070" : "#2a2a3a", border: s.active ? "2px solid #e0507f" : "2px solid #3a3a4a", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 7, fontWeight: 900, color: s.active ? "#fff" : "#666" }}>{s.step}</span>
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: s.active ? "#f5f5f5" : "#555" }}>{s.label}</div>
-                  {s.sub && <div style={{ fontSize: 8, color: "#888", marginTop: 1 }}>{s.sub}</div>}
-                </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+            <div style={{ background: "#ef444411", border: "1px solid #ef444440", borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
+              <div style={{ fontSize: 9, color: "#ef4444", marginBottom: 4 }}>Aguardando</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: "#ef4444", lineHeight: 1 }}>1</div>
+            </div>
+            <div style={{ background: "#f59e0b11", border: "1px solid #f59e0b40", borderRadius: 12, padding: "12px 10px", textAlign: "center" }}>
+              <div style={{ fontSize: 9, color: "#f59e0b", marginBottom: 4 }}>Em atendimento</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: "#f59e0b", lineHeight: 1 }}>0</div>
+            </div>
+          </div>
+          <div style={{ background: "#ef444411", border: "1px solid #ef444440", borderRadius: 12, padding: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 900, color: "#f5f5f5" }}>Mesa 4</div>
+                <div style={{ fontSize: 10, color: "#888", marginTop: 2 }}>Carlos · 00:08</div>
               </div>
-            ))}
-          </div>
-          {/* Order summary */}
-          <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: "10px 12px", marginTop: 18 }}>
-            <div style={{ fontSize: 7.5, fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Resumo do Pedido</div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 9, marginBottom: 4 }}>
-              <span style={{ color: "#ccc" }}>1x Combo Frango</span>
-              <span style={{ color: "#ccc" }}>R$ 28,00</span>
-            </div>
-            <div style={{ borderTop: "1px solid #2a2a3a", paddingTop: 6, display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>Total</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>R$ 28,00</span>
+              <button style={{ background: "#c94070", border: "none", borderRadius: 10, padding: "9px 14px", fontSize: 11, fontWeight: 800, color: "#fff", cursor: "pointer" }}>Atender</button>
             </div>
           </div>
         </div>
       </PhoneFrame>
     </div>
+  );
+}
+
+function CardapioAdminMockup() {
+  return (
+    <BrowserFrame title="Cardápio · FoodNex">
+      <div style={{ padding: 12, fontSize: 10 }}>
+        <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "6px 10px", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 7.5, color: "#888", marginBottom: 2 }}>Link público do cardápio</div>
+            <div style={{ fontSize: 8.5, color: "#c94070", fontFamily: "monospace" }}>foodnex.app/pizzanova</div>
+          </div>
+          <button style={{ background: "#c94070", border: "none", borderRadius: 6, padding: "4px 8px", fontSize: 8, fontWeight: 700, color: "#fff", cursor: "pointer" }}>Copiar</button>
+        </div>
+        <div style={{ display: "flex", gap: 3, background: "#1a1a2a", borderRadius: 8, padding: 3, marginBottom: 10 }}>
+          {["Categorias", "Adicionais", "Produtos", "Disponibilidade"].map((t, i) => (
+            <div key={t} style={{ flex: 1, textAlign: "center", padding: "4px 0", borderRadius: 6, fontSize: 7.5, fontWeight: 600, background: i === 0 ? "#13131a" : "transparent", color: i === 0 ? "#f5f5f5" : "#888" }}>{t}</div>
+          ))}
+        </div>
+        {[
+          { name: "Pizzas", items: 12 },
+          { name: "Hambúrgueres", items: 7 },
+          { name: "Bebidas", items: 10 },
+          { name: "Sobremesas", items: 5 },
+        ].map((cat) => (
+          <div key={cat.name} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "7px 10px", marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>{cat.name}</div>
+              <div style={{ fontSize: 7.5, color: "#888" }}>{cat.items} produtos</div>
+            </div>
+            <button style={{ background: "#2a2a3a", border: "1px solid #3a3a4a", borderRadius: 5, padding: "2px 7px", fontSize: 7.5, color: "#aaa", cursor: "pointer" }}>Editar</button>
+          </div>
+        ))}
+      </div>
+    </BrowserFrame>
+  );
+}
+
+function RetiradasAdminMockup() {
+  return (
+    <BrowserFrame title="Retiradas · FoodNex">
+      <div style={{ padding: 12, fontSize: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
+          <div style={{ background: "#f59e0b11", border: "1px solid #f59e0b33", borderRadius: 8, padding: 8, textAlign: "center" }}>
+            <div style={{ fontSize: 16, fontWeight: 900, color: "#f59e0b" }}>3</div>
+            <div style={{ fontSize: 7.5, color: "#f59e0b99" }}>Aguardando retirada</div>
+          </div>
+          <div style={{ background: "#22c55e11", border: "1px solid #22c55e33", borderRadius: 8, padding: 8, textAlign: "center" }}>
+            <div style={{ fontSize: 16, fontWeight: 900, color: "#22c55e" }}>11</div>
+            <div style={{ fontSize: 7.5, color: "#22c55e99" }}>Concluídas hoje</div>
+          </div>
+        </div>
+        <input style={{ width: "100%", background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 6, padding: "4px 8px", fontSize: 8, color: "#888", boxSizing: "border-box", marginBottom: 8, outline: "none" }} placeholder="Buscar por cliente..." readOnly />
+        {[
+          { id: "#0043", name: "Pedro Alves", items: "1x Combo Frango", total: "R$28,00" },
+          { id: "#0041", name: "Carla Souza", items: "2x X-Bacon", total: "R$52,00" },
+          { id: "#0038", name: "Lucas Ferreira", items: "1x Pizza M, 1x Suco", total: "R$45,00" },
+        ].map((o) => (
+          <div key={o.id} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "7px 8px", marginBottom: 5 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+              <span style={{ fontSize: 8, fontWeight: 800, color: "#c94070" }}>{o.id}</span>
+              <span style={{ fontSize: 8.5, fontWeight: 700, color: "#e5e5e5" }}>{o.name}</span>
+              <span style={{ marginLeft: "auto", fontSize: 7, fontWeight: 700, color: "#f59e0b", background: "#f59e0b22", borderRadius: 99, padding: "1px 5px" }}>Aguardando</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 7.5, color: "#888" }}>{o.items} · {o.total}</span>
+              <button style={{ background: "#c9407022", border: "1px solid #c9407055", borderRadius: 5, padding: "2px 7px", fontSize: 7.5, fontWeight: 700, color: "#c94070", cursor: "pointer" }}>Entregar →</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </BrowserFrame>
   );
 }
 
@@ -514,14 +483,12 @@ function RelatoriosMockup() {
   return (
     <BrowserFrame title="Relatórios · FoodNex">
       <div style={{ padding: 12, fontSize: 10 }}>
-        {/* Date filter */}
         <div style={{ display: "flex", gap: 6, marginBottom: 10, alignItems: "center" }}>
           <div style={{ flex: 1, background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 6, padding: "4px 8px", fontSize: 8, color: "#888" }}>01/10/2025</div>
           <span style={{ fontSize: 8, color: "#555" }}>→</span>
           <div style={{ flex: 1, background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 6, padding: "4px 8px", fontSize: 8, color: "#888" }}>31/10/2025</div>
           <button style={{ background: "#c94070", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 8, fontWeight: 700, color: "#fff", cursor: "pointer" }}>Filtrar</button>
         </div>
-        {/* KPI cards */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
           {[
             { val: "R$48.320", lbl: "Total Faturado", c: "#22c55e" },
@@ -534,7 +501,6 @@ function RelatoriosMockup() {
             </div>
           ))}
         </div>
-        {/* Payment breakdown */}
         <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
           <div style={{ fontSize: 8, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Formas de Pagamento</div>
           {payments.map((p) => (
@@ -549,7 +515,6 @@ function RelatoriosMockup() {
             </div>
           ))}
         </div>
-        {/* Type breakdown */}
         <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: "8px 10px" }}>
           <div style={{ fontSize: 8, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Por Tipo de Pedido</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
@@ -575,7 +540,6 @@ function WhatsAppMockup() {
   return (
     <BrowserFrame title="WhatsApp · FoodNex">
       <div style={{ padding: 14, fontSize: 10 }}>
-        {/* Status */}
         <div style={{ background: "#16a34a22", border: "1px solid #16a34a44", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, background: "#25d36622", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>💬</div>
           <div>
@@ -584,8 +548,6 @@ function WhatsAppMockup() {
           </div>
           <button style={{ marginLeft: "auto", background: "#ef444411", border: "1px solid #ef444433", borderRadius: 6, padding: "3px 8px", fontSize: 7.5, fontWeight: 700, color: "#ef4444", cursor: "pointer" }}>Desconectar</button>
         </div>
-
-        {/* PIX Key */}
         <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: "10px 12px", marginBottom: 14 }}>
           <div style={{ fontSize: 8.5, fontWeight: 700, color: "#f5f5f5", marginBottom: 6 }}>Chave PIX para Pagamentos</div>
           <div style={{ display: "flex", gap: 6 }}>
@@ -593,26 +555,74 @@ function WhatsAppMockup() {
             <button style={{ background: "#c94070", border: "none", borderRadius: 6, padding: "4px 10px", fontSize: 8, fontWeight: 700, color: "#fff", cursor: "pointer" }}>Salvar</button>
           </div>
         </div>
-
-        {/* Como funciona */}
-        <div>
-          <div style={{ fontSize: 8.5, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>Como funciona</div>
-          {[
-            { n: 1, title: "Conecte seu WhatsApp", sub: "Escaneie o QR code no painel de configurações" },
-            { n: 2, title: "Pedidos confirmados automaticamente", sub: "O cliente recebe confirmação ao fazer o pedido" },
-            { n: 3, title: "Notificação de saída para entrega", sub: "Aviso automático quando o entregador sai" },
-            { n: 4, title: "Chave PIX integrada", sub: "Cliente recebe a chave PIX direto no WhatsApp" },
-          ].map((s) => (
-            <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#c9407022", border: "1px solid #c9407044", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <span style={{ fontSize: 8.5, fontWeight: 900, color: "#c94070" }}>{s.n}</span>
-              </div>
-              <div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>{s.title}</div>
-                <div style={{ fontSize: 7.5, color: "#888", marginTop: 1 }}>{s.sub}</div>
-              </div>
+        <div style={{ fontSize: 8.5, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>Como funciona</div>
+        {[
+          { n: 1, title: "Conecte seu WhatsApp", sub: "Escaneie o QR code no painel de configurações" },
+          { n: 2, title: "Pedidos confirmados automaticamente", sub: "O cliente recebe confirmação ao fazer o pedido" },
+          { n: 3, title: "Notificação de saída para entrega", sub: "Aviso automático quando o entregador sai" },
+          { n: 4, title: "Chave PIX integrada", sub: "Cliente recebe a chave PIX direto no WhatsApp" },
+        ].map((s) => (
+          <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
+            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#c9407022", border: "1px solid #c9407044", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <span style={{ fontSize: 8.5, fontWeight: 900, color: "#c94070" }}>{s.n}</span>
             </div>
+            <div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "#f5f5f5" }}>{s.title}</div>
+              <div style={{ fontSize: 7.5, color: "#888", marginTop: 1 }}>{s.sub}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </BrowserFrame>
+  );
+}
+
+function ConfiguracoesMockup() {
+  return (
+    <BrowserFrame title="Configurações · FoodNex">
+      <div style={{ padding: 14, fontSize: 10 }}>
+        {/* tabs */}
+        <div style={{ display: "flex", gap: 3, background: "#1a1a2a", borderRadius: 8, padding: 3, marginBottom: 14 }}>
+          {["Geral", "Horários", "Aparência", "Notificações"].map((t, i) => (
+            <div key={t} style={{ flex: 1, textAlign: "center", padding: "4px 0", borderRadius: 6, fontSize: 7.5, fontWeight: 600, background: i === 0 ? "#13131a" : "transparent", color: i === 0 ? "#f5f5f5" : "#888" }}>{t}</div>
           ))}
+        </div>
+
+        {/* Logo */}
+        <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+          <div style={{ fontSize: 8.5, fontWeight: 700, color: "#f5f5f5", marginBottom: 8 }}>Logo do Estabelecimento</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 52, height: 52, background: "#2a2a3a", borderRadius: 12, border: "2px dashed #3a3a4a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🍕</div>
+            <div>
+              <button style={{ display: "block", background: "#c94070", border: "none", borderRadius: 7, padding: "5px 12px", fontSize: 8, fontWeight: 700, color: "#fff", cursor: "pointer", marginBottom: 4 }}>Alterar logo</button>
+              <div style={{ fontSize: 7.5, color: "#666" }}>PNG ou JPG · máx. 2MB</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Banner */}
+        <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+          <div style={{ fontSize: 8.5, fontWeight: 700, color: "#f5f5f5", marginBottom: 8 }}>Banner do Cardápio</div>
+          <div style={{ width: "100%", height: 48, background: "linear-gradient(135deg, #7c2d12, #c94070)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 8, color: "rgba(255,255,255,.7)" }}>Banner atual</span>
+          </div>
+          <button style={{ background: "#2a2a3a", border: "1px solid #3a3a4a", borderRadius: 7, padding: "4px 10px", fontSize: 8, fontWeight: 600, color: "#aaa", cursor: "pointer" }}>Trocar banner</button>
+        </div>
+
+        {/* Tipo de estabelecimento */}
+        <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+          <div style={{ fontSize: 8.5, fontWeight: 700, color: "#f5f5f5", marginBottom: 6 }}>Tipo de Estabelecimento</div>
+          <div style={{ background: "#13131a", border: "1px solid #2a2a3a", borderRadius: 7, padding: "5px 10px", fontSize: 8.5, color: "#ccc", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Pizzaria</span>
+            <span style={{ color: "#666", fontSize: 8 }}>▼</span>
+          </div>
+        </div>
+
+        {/* Nome */}
+        <div style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 10, padding: "10px 12px" }}>
+          <div style={{ fontSize: 8.5, fontWeight: 700, color: "#f5f5f5", marginBottom: 6 }}>Nome do Estabelecimento</div>
+          <div style={{ background: "#13131a", border: "1px solid #2a2a3a", borderRadius: 7, padding: "5px 10px", fontSize: 8.5, color: "#ccc", marginBottom: 8 }}>Pizza Nova</div>
+          <button style={{ background: "#c94070", border: "none", borderRadius: 7, padding: "5px 14px", fontSize: 8, fontWeight: 700, color: "#fff", cursor: "pointer" }}>Salvar alterações</button>
         </div>
       </div>
     </BrowserFrame>
@@ -642,13 +652,76 @@ function FeatureSection({
           className="feature-grid"
         >
           <div style={{ order: reverse ? 2 : 1 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", borderRadius: 99, border: "1px solid rgba(201,64,112,.3)", background: "rgba(201,64,112,.08)", padding: "5px 14px", fontSize: ".75rem", fontWeight: 700, color: "#c94070", marginBottom: 20 }}>
+            {/* Badge — white, large */}
+            <div style={{ display: "inline-flex", alignItems: "center", borderRadius: 99, border: "1px solid rgba(255,255,255,.22)", background: "rgba(255,255,255,.07)", padding: "7px 20px", fontSize: ".9rem", fontWeight: 700, color: "#ffffff", marginBottom: 22, letterSpacing: "0.01em" }}>
               {label}
             </div>
             <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.2rem)", fontWeight: 800, lineHeight: 1.25, marginBottom: 16 }}>{title}</h2>
             <p style={{ fontSize: ".95rem", color: "var(--muted)", lineHeight: 1.75 }}>{desc}</p>
           </div>
           <div style={{ order: reverse ? 1 : 2 }}>{mockup}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════ CLIENT EXPERIENCE SECTION ═══════════════════════ */
+function ExperienciaClienteSection() {
+  const { ref, visible } = useReveal();
+  return (
+    <section id="experiencia-cliente" style={{ padding: "100px 0", borderTop: "1px solid rgba(255,255,255,.04)" }}>
+      <div style={{ maxWidth: 1100, marginInline: "auto", paddingInline: 24 }}>
+        <div ref={ref} style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(50px)",
+          transition: "opacity .8s ease, transform .8s ease",
+        }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", borderRadius: 99, border: "1px solid rgba(255,255,255,.22)", background: "rgba(255,255,255,.07)", padding: "7px 20px", fontSize: ".9rem", fontWeight: 700, color: "#ffffff", marginBottom: 22 }}>
+              Cardápio & Pedidos
+            </div>
+            <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 800, lineHeight: 1.2, marginBottom: 16 }}>
+              Experiência completa para seus clientes
+            </h2>
+            <p style={{ fontSize: "1rem", color: "var(--muted)", maxWidth: 560, marginInline: "auto", lineHeight: 1.7 }}>
+              Seus clientes acessam o cardápio, fazem o pedido e acompanham tudo em tempo real — direto pelo celular, sem precisar baixar nenhum aplicativo.
+            </p>
+          </div>
+
+          {/* Two phones */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start" }} className="two-phones-grid">
+            {/* Phone 1: Cardápio */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <PhoneFrame>
+                  <PhoneCardapio />
+                </PhoneFrame>
+              </div>
+              <div style={{ textAlign: "center", maxWidth: 280 }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#f5f5f5", marginBottom: 8 }}>Cardápio Digital</h3>
+                <p style={{ fontSize: ".88rem", color: "var(--muted)", lineHeight: 1.65 }}>
+                  O cliente escaneia o QR code da mesa, da loja ou acessa o link e vê todo o cardápio com fotos, descrições e preços. Faz o pedido direto — sem precisar falar com ninguém.
+                </p>
+              </div>
+            </div>
+
+            {/* Phone 2: Order Tracking */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <PhoneFrame>
+                  <PhoneTracking />
+                </PhoneFrame>
+              </div>
+              <div style={{ textAlign: "center", maxWidth: 280 }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#f5f5f5", marginBottom: 8 }}>Acompanhamento em Tempo Real</h3>
+                <p style={{ fontSize: ".88rem", color: "var(--muted)", lineHeight: 1.65 }}>
+                  Após fazer o pedido, o cliente acompanha cada etapa — de "pedido recebido" até "pronto para retirar" — sem precisar ligar para o restaurante.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -759,6 +832,7 @@ export default function Home() {
           .pricing-grid { grid-template-columns: 1fr !important; }
           .stats-grid { grid-template-columns: 1fr 1fr !important; }
           .nav-links { display: none !important; }
+          .two-phones-grid { grid-template-columns: 1fr !important; gap: 60px !important; }
         }
       `}</style>
 
@@ -865,12 +939,15 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── EXPERIÊNCIA DO CLIENTE (2 phones) ── */}
+        <ExperienciaClienteSection />
+
         {/* ── FEATURE SECTIONS ── */}
         <FeatureSection
           id="dashboard"
           label="Dashboard"
           title="Visão completa do seu negócio em tempo real"
-          desc="Acompanhe faturamento, quantidade de pedidos e ticket médio do dia. Veja todos os pedidos ativos — mesas, entregas e retiradas — num único painel. Controle de caixa integrado com histórico de datas anteriores e acompanhamento de mesas ocupadas."
+          desc="Acompanhe faturamento, quantidade de pedidos e ticket médio do dia. Veja todos os pedidos ativos — mesas, entregas e retiradas — num único painel. Controle de caixa integrado com histórico de datas anteriores."
           mockup={<DashboardMockup />}
         />
 
@@ -904,16 +981,16 @@ export default function Home() {
           id="cardapio"
           label="Cardápio"
           title="Cardápio digital com link único para seus clientes"
-          desc="Cadastre categorias, produtos, sabores, tamanhos e adicionais no painel admin. Gere automaticamente um link do cardápio digital que seus clientes abrem no celular para fazer pedidos. Controle disponibilidade de cada item em tempo real."
-          mockup={<CardapioMockup />}
+          desc="Cadastre categorias, produtos, sabores, tamanhos e adicionais no painel admin. Gere automaticamente um link do cardápio digital que seus clientes acessam pelo celular para fazer pedidos. Controle disponibilidade de cada item em tempo real."
+          mockup={<CardapioAdminMockup />}
         />
 
         <FeatureSection
           id="retiradas"
           label="Retiradas"
-          title="Pedidos para retirar com acompanhamento do cliente"
-          desc="Gerencie pedidos de balcão com fila de espera em tempo real. O cliente acompanha o status do pedido pelo celular — da confirmação até ficar pronto para retirar — sem precisar ligar para o restaurante."
-          mockup={<RetiradasMockup />}
+          title="Pedidos para retirar com fila organizada"
+          desc="Gerencie pedidos de balcão com fila de espera em tempo real. Veja quem está aguardando, finalize a retirada com um clique e mantenha o histórico de todos os pedidos concluídos no dia."
+          mockup={<RetiradasAdminMockup />}
           reverse
         />
 
@@ -940,6 +1017,15 @@ export default function Home() {
           title="Automação de mensagens pelo WhatsApp"
           desc="Conecte seu número de WhatsApp e automatize confirmações, notificações de entrega e envio de chave PIX para seus clientes. Tudo configurado no painel em minutos, sem precisar de um número adicional."
           mockup={<WhatsAppMockup />}
+        />
+
+        <FeatureSection
+          id="configuracoes"
+          label="Configurações"
+          title="Configure seu estabelecimento do jeito que você quer"
+          desc="Personalize logo, banner do cardápio, nome e tipo do estabelecimento. Defina horários de funcionamento, aparência e preferências de notificação. Tudo num painel simples, sem precisar de suporte técnico."
+          mockup={<ConfiguracoesMockup />}
+          reverse
         />
 
         <Pricing />
