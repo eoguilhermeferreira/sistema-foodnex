@@ -538,8 +538,8 @@ function RelatoriosMockup() {
 
 function WhatsAppPhone() {
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-      <PhoneFrame scale={0.72}>
+    <div style={{ display: "flex", justifyContent: "center" }}>
+      <PhoneFrame>
         {/* WhatsApp chat screen */}
         <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#111b21", fontFamily: "sans-serif" }}>
           {/* Header */}
@@ -593,8 +593,9 @@ function WhatsAppPhone() {
 
 function WhatsAppMockup() {
   return (
-    <div>
+    <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
       <WhatsAppPhone />
+      <div style={{ flex: 1, minWidth: 0 }}>
       <BrowserFrame title="WhatsApp · FoodNex">
       <div style={{ padding: 14, fontSize: 10 }}>
         <div style={{ background: "#16a34a22", border: "1px solid #16a34a44", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
@@ -631,6 +632,7 @@ function WhatsAppMockup() {
         ))}
       </div>
     </BrowserFrame>
+      </div>
     </div>
   );
 }
