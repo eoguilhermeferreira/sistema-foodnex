@@ -536,9 +536,66 @@ function RelatoriosMockup() {
   );
 }
 
+function WhatsAppPhone() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+      <PhoneFrame scale={0.72}>
+        {/* WhatsApp chat screen */}
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#111b21", fontFamily: "sans-serif" }}>
+          {/* Header */}
+          <div style={{ background: "#1f2c34", padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #2a3942" }}>
+            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#25d366", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🍕</div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#e9edef" }}>Pizza Nova</div>
+              <div style={{ fontSize: 9, color: "#8696a0" }}>online</div>
+            </div>
+          </div>
+          {/* Chat background */}
+          <div style={{ flex: 1, background: "#0b141a", padding: "10px 10px 6px", overflowY: "hidden", display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 8 }}>
+            {/* Message bubble */}
+            <div style={{ alignSelf: "flex-start", background: "#202c33", borderRadius: "0 10px 10px 10px", padding: "8px 10px", maxWidth: "90%", boxShadow: "0 1px 2px rgba(0,0,0,.4)" }}>
+              <div style={{ fontSize: 9.5, fontWeight: 800, color: "#25d366", marginBottom: 5 }}>PEDIDO #0042</div>
+              <div style={{ fontSize: 9, color: "#25d366", fontWeight: 700, marginBottom: 6 }}>✅ SEU PEDIDO FOI CONFIRMADO!</div>
+              <div style={{ fontSize: 8.5, color: "#d1d7db", lineHeight: 1.6 }}>
+                <div>👤 Nome: Lucas Mendes</div>
+                <div>📞 Telefone: (11) 9 8765-4321</div>
+                <div>📦 Tipo: Entrega 🛵</div>
+                <div>📍 Rua das Flores, 128 — apto 3</div>
+                <div>🕐 Horário: 19:42</div>
+              </div>
+              <div style={{ fontSize: 9, color: "#d1d7db", fontWeight: 700, marginTop: 6, borderTop: "1px solid #2a3942", paddingTop: 5 }}>🍽️ PEDIDO</div>
+              <div style={{ fontSize: 8.5, color: "#d1d7db", lineHeight: 1.6, marginTop: 3 }}>
+                <div>▪ 1x Pizza Calabresa G — R$ 55,00</div>
+                <div>▪ 1x Coca-Cola 2L — R$ 14,00</div>
+              </div>
+              <div style={{ fontSize: 8.5, color: "#d1d7db", marginTop: 6, borderTop: "1px solid #2a3942", paddingTop: 5 }}>
+                <div>Subtotal: <b>R$ 69,00</b></div>
+                <div>Taxa de entrega: R$ 8,00</div>
+                <div style={{ fontWeight: 800, color: "#e9edef" }}>Total: R$ 77,00</div>
+              </div>
+              <div style={{ fontSize: 8, color: "#8696a0", marginTop: 6, borderTop: "1px solid #2a3942", paddingTop: 4 }}>
+                <div>💳 Pagamento: PIX</div>
+              </div>
+              <div style={{ fontSize: 7.5, color: "#8696a0", marginTop: 5, fontStyle: "italic" }}>SISTEMA FOODNEX 1.0<br/>Gestão inteligente de pedidos</div>
+              <div style={{ fontSize: 7.5, color: "#8696a0", textAlign: "right", marginTop: 4 }}>19:42 ✓✓</div>
+            </div>
+          </div>
+          {/* Input bar */}
+          <div style={{ background: "#1f2c34", padding: "6px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ flex: 1, background: "#2a3942", borderRadius: 20, padding: "5px 12px", fontSize: 9, color: "#8696a0" }}>Mensagem</div>
+            <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00a884", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>🎤</div>
+          </div>
+        </div>
+      </PhoneFrame>
+    </div>
+  );
+}
+
 function WhatsAppMockup() {
   return (
-    <BrowserFrame title="WhatsApp · FoodNex">
+    <div>
+      <WhatsAppPhone />
+      <BrowserFrame title="WhatsApp · FoodNex">
       <div style={{ padding: 14, fontSize: 10 }}>
         <div style={{ background: "#16a34a22", border: "1px solid #16a34a44", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, background: "#25d36622", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>💬</div>
@@ -574,6 +631,7 @@ function WhatsAppMockup() {
         ))}
       </div>
     </BrowserFrame>
+    </div>
   );
 }
 
