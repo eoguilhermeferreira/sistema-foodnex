@@ -69,6 +69,7 @@ input, textarea, select {
   }
   .whatsapp-browser-wrap {
     width: 100%;
+    order: -1;
   }
 }
 
