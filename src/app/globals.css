@@ -87,3 +87,30 @@ input, textarea, select {
     order: unset !important;
   }
 }
+
+/* Pricing carousel */
+.plans-carousel {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .plans-carousel {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+    /* hide scrollbar visually */
+    scrollbar-width: none;
+  }
+  .plans-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  .plans-carousel > * {
+    flex: 0 0 85vw;
+    max-width: 340px;
+    scroll-snap-align: center;
+  }
+}

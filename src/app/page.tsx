@@ -886,7 +886,7 @@ function Pricing() {
             </div>
           </Reveal>
           <Reveal delay={100}>
-            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            <div className="plans-carousel">
               <PlanCard type="monthly" />
               <PlanCard type="annual" />
             </div>
