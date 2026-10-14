@@ -114,3 +114,8 @@ input, textarea, select {
     scroll-snap-align: center;
   }
 }
+
+/* Clip overflow from carousel cards on mobile */
+.plans-carousel-outer {
+  overflow: hidden;
+}

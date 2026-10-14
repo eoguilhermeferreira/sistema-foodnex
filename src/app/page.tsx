@@ -886,9 +886,11 @@ function Pricing() {
             </div>
           </Reveal>
           <Reveal delay={100}>
-            <div className="plans-carousel">
-              <PlanCard type="monthly" />
-              <PlanCard type="annual" />
+            <div className="plans-carousel-outer">
+              <div className="plans-carousel">
+                <PlanCard type="monthly" />
+                <PlanCard type="annual" />
+              </div>
             </div>
           </Reveal>
         </div>
