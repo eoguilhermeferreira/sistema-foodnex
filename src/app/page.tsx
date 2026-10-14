@@ -960,7 +960,7 @@ export default function Home() {
           </Link>
           <div className="nav-links" style={{ display: "flex", gap: 28, marginLeft: 8 }}>
             {[
-              { label: "Sistema", href: "#dashboard" },
+              { label: "Sistema", href: "#experiencia-cliente" },
               { label: "Preços", href: "#precos" },
               { label: "FAQ", href: "#faq" },
             ].map((l) => (
@@ -1021,7 +1021,7 @@ export default function Home() {
                 >
                   Começar teste grátis →
                 </Link>
-                <a href="#dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 32px", borderRadius: 14, border: "1px solid rgba(255,255,255,.12)", color: "var(--muted)", fontSize: "1rem", fontWeight: 600, textDecoration: "none", background: "rgba(255,255,255,.04)", transition: "background .2s, color .2s" }}
+                <a href="#experiencia-cliente" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 32px", borderRadius: 14, border: "1px solid rgba(255,255,255,.12)", color: "var(--muted)", fontSize: "1rem", fontWeight: 600, textDecoration: "none", background: "rgba(255,255,255,.04)", transition: "background .2s, color .2s" }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; e.currentTarget.style.color = "#f5f5f5"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.04)"; e.currentTarget.style.color = "var(--muted)"; }}
                 >
