@@ -115,9 +115,14 @@ input, textarea, select {
   }
 }
 
-/* Clip overflow from carousel cards on mobile, give space for the badge */
+/* Give space for the "MAIS POPULAR" badge above the annual card */
 .plans-carousel-outer {
-  overflow: hidden;
   padding-top: 20px;
   margin-top: -20px;
+}
+
+/* Clip cards that are off-screen sideways, but not the top (badge space) */
+.plans-carousel-clip {
+  overflow: hidden;
+  padding-top: 1px;
 }
