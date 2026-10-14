@@ -115,7 +115,9 @@ input, textarea, select {
   }
 }
 
-/* Clip overflow from carousel cards on mobile */
+/* Clip overflow from carousel cards on mobile, give space for the badge */
 .plans-carousel-outer {
   overflow: hidden;
+  padding-top: 20px;
+  margin-top: -20px;
 }
