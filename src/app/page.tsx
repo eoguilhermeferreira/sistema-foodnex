@@ -825,10 +825,12 @@ function Pricing() {
     const loading = loadingPlan === type;
     const isAnnual = type === "annual";
     return (
-      <div style={{ flex: 1, minWidth: 280, position: "relative", borderRadius: 24, border: `1.5px solid ${isAnnual ? "#c94070" : "#2a2a2e"}`, background: isAnnual ? "linear-gradient(145deg,#1e0d14,#1a1a1d)" : "#1a1a1d", padding: "40px 32px 32px", boxSizing: "border-box", boxShadow: isAnnual ? "0 0 60px rgba(201,64,112,.15)" : "none" }}>
+      <div style={{ flex: 1, minWidth: 280, position: "relative", borderRadius: 24, border: `1.5px solid ${isAnnual ? "#c94070" : "#2a2a2e"}`, background: isAnnual ? "linear-gradient(145deg,#1e0d14,#1a1a1d)" : "#1a1a1d", padding: isAnnual ? "24px 32px 32px" : "40px 32px 32px", boxSizing: "border-box", boxShadow: isAnnual ? "0 0 60px rgba(201,64,112,.15)" : "none" }}>
         {isAnnual && (
-          <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: "#c94070", color: "#fff", fontSize: ".65rem", fontWeight: 800, padding: "4px 14px", borderRadius: 99, whiteSpace: "nowrap", letterSpacing: ".06em" }}>
-            MAIS POPULAR · ECONOMIZE 45%
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <span style={{ display: "inline-block", background: "#c94070", color: "#fff", fontSize: ".65rem", fontWeight: 800, padding: "4px 14px", borderRadius: 99, whiteSpace: "nowrap", letterSpacing: ".06em" }}>
+              MAIS POPULAR · ECONOMIZE 45%
+            </span>
           </div>
         )}
         <div style={{ fontSize: ".8rem", fontWeight: 700, color: isAnnual ? "#c94070" : "var(--muted)", marginBottom: 8, textTransform: "uppercase", letterSpacing: ".06em" }}>
