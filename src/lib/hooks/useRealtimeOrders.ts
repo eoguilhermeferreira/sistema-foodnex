@@ -10,10 +10,15 @@ export function useRealtimeOrders(companyId: string) {
 
   const fetchOrders = useCallback(async () => {
     const supabase = createClient();
+    // Only fetch active orders + today's concluded ones to avoid the 1000-row PostgREST limit
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
     const { data } = await supabase
       .from("orders")
       .select("*, order_items(*), addresses(*), tables_restaurant(number)")
       .eq("company_id", companyId)
+      .or(`status.in.(aguardando_aceite,em_preparo,pronto),and(status.in.(concluido,cancelado),created_at.gte.${todayStart.toISOString()})`)
       .order("created_at", { ascending: true });
 
     const normalized = (data ?? []).map((o: any) => ({
